@@ -1,0 +1,2 @@
+# Normalize line endings on checkout; let Git detect text files
+* text=auto

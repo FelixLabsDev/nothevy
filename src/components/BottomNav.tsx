@@ -1,0 +1,31 @@
+import { NavLink } from 'react-router-dom'
+import { LayoutDashboard, Dumbbell, ClipboardList, History, Settings } from 'lucide-react'
+
+const tabs = [
+  { to: '/',          label: 'Home',      Icon: LayoutDashboard },
+  { to: '/exercises', label: 'Exercises', Icon: Dumbbell },
+  { to: '/templates', label: 'Templates', Icon: ClipboardList },
+  { to: '/history',   label: 'History',   Icon: History },
+  { to: '/settings',  label: 'Settings',  Icon: Settings }
+]
+
+export default function BottomNav() {
+  return (
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg
+                    bg-slate-950/95 backdrop-blur border-t border-slate-800 pb-safe z-50">
+      <div className="flex justify-around">
+        {tabs.map(({ to, label, Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
+          >
+            <Icon size={22} strokeWidth={1.8} />
+            <span className="text-[11px]">{label}</span>
+          </NavLink>
+        ))}
+      </div>
+    </nav>
+  )
+}
