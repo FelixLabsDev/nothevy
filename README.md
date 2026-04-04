@@ -1,6 +1,8 @@
 # NotHevy
 
-Fast, offline-first PWA workout tracker. No account, no server — everything lives in your browser.
+Fast, offline-first PWA workout tracker.
+
+**Repository:** [github.com/FelixLabsDev/nothevy](https://github.com/FelixLabsDev/nothevy) No account, no server — everything lives in your browser.
 
 ## Features
 
@@ -55,5 +57,6 @@ Go to **Settings → Claude API Key** and enter your `sk-ant-api03-…` key. It 
 
 | Version | Notes |
 |---|---|
+| 0.2.7 | Document GitHub remote URL in README |
 | 0.2.6 | Git repository setup; root `.gitignore` and `.gitattributes` for Vite/Node |
 | 0.1.0 | Initial implementation — full core loop, AI, PWA |
