@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "name": "NotHevy Local DB Seed",
+    "version": 1
+  },
+  "exercises": [],
+  "templates": [],
+  "sessions": [],
+  "personalRecords": [],
+  "settings": {
+    "defaultWeightUnit": "kg",
+    "defaultRestSeconds": 120,
+    "defaultSetRowCount": 3,
+    "theme": "dark",
+    "aiProvider": "claude"
+  }
+}

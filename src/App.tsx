@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { bootstrapDbFromLocalFile } from '@/db'
 import BottomNav from '@/components/BottomNav'
 import Dashboard from '@/pages/Dashboard'
 import Exercises from '@/pages/Exercises'
@@ -14,8 +15,8 @@ import Settings from '@/pages/Settings'
 export default function App() {
   const { load } = useSettingsStore()
 
-  // Hydrate settings from Dexie on first mount
-  useEffect(() => { load() }, [load])
+  // Seed DB from committed local file on first run, then hydrate settings.
+  useEffect(() => { void bootstrapDbFromLocalFile().then(load) }, [load])
 
   return (
     <div className="max-w-lg mx-auto min-h-screen relative">

@@ -7,10 +7,10 @@ Single-page React app (Vite). All data is local — no backend, no auth. Indexed
 ```
 src/
 ├── types/         Pure TypeScript interfaces (Exercise, Template, Session, …)
-├── db/            Dexie schema + typed settings helpers
+├── db/            Dexie schema, settings helpers, local-file seed bootstrap
 ├── lib/
 │   ├── workout.ts Volume calc, PR detection, progressive overload, ID generation
-│   └── claude.ts  Claude API calls (template gen, coaching, weekly insight)
+│   └── ai.ts      LangChain AI calls (template gen, coaching, weekly insight)
 ├── stores/
 │   ├── settingsStore.ts  Zustand — app settings, persisted in Dexie
 │   └── sessionStore.ts   Zustand — in-progress workout state + rest timer
@@ -42,6 +42,7 @@ React Components ←→ Zustand stores
 - **Read**: components subscribe via `useLiveQuery` — re-renders on any relevant DB change.
 - **Write**: mutations go through Dexie directly (exercises, templates, sessions) or through Zustand (in-session state).
 - **Settings**: stored as `{key, value}` rows in Dexie; `settingsStore` caches them in Zustand.
+- **Seed file**: if Dexie is empty on first run, app loads `public/local-db.json` into tables.
 
 ## Data Model
 

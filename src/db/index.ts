@@ -46,3 +46,49 @@ export async function getAllSettings(): Promise<Partial<import('@/types').AppSet
   const rows = await db.settings.toArray()
   return Object.fromEntries(rows.map(r => [r.key, r.value])) as Partial<import('@/types').AppSettings>
 }
+
+// ---------------------------------------------------------------------------
+// Local file seed bootstrap — load data from committed public/local-db.json
+// on first run when DB is empty.
+// ---------------------------------------------------------------------------
+type LocalDbSeed = {
+  exercises?: Array<Omit<Exercise, 'media'> & { media?: Exercise['media'] }>
+  templates?: WorkoutTemplate[]
+  sessions?: WorkoutSession[]
+  personalRecords?: PersonalRecord[]
+  settings?: Record<string, unknown>
+}
+
+function normalizeExerciseMedia(exercise: Omit<Exercise, 'media'> & { media?: Exercise['media'] }): Exercise {
+  return { ...exercise, media: exercise.media ?? [] }
+}
+
+export async function bootstrapDbFromLocalFile(path = '/local-db.json'): Promise<void> {
+  const counts = await Promise.all([
+    db.exercises.count(),
+    db.templates.count(),
+    db.sessions.count(),
+    db.personalRecords.count(),
+    db.settings.count()
+  ])
+
+  // If anything exists already, treat DB as initialized.
+  if (counts.some(c => c > 0)) return
+
+  try {
+    const response = await fetch(path, { cache: 'no-store' })
+    if (!response.ok) return
+    const seed = await response.json() as LocalDbSeed
+
+    if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
+    if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
+    if (seed.sessions?.length) await db.sessions.bulkPut(seed.sessions)
+    if (seed.personalRecords?.length) await db.personalRecords.bulkPut(seed.personalRecords)
+    if (seed.settings) {
+      const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
+      if (rows.length) await db.settings.bulkPut(rows)
+    }
+  } catch {
+    // Ignore seed failures and continue with an empty DB.
+  }
+}

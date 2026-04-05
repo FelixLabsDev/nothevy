@@ -107,6 +107,28 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Default sets per row */}
+        <div className="card">
+          <div className="flex items-center gap-3 mb-3">
+            <Dumbbell size={18} className="text-brand-400" />
+            <span className="font-semibold">Default Sets Per Row</span>
+          </div>
+          {/* +/-1 stepper */}
+          <div className="flex items-center gap-3">
+            <button
+              className="btn-ghost w-12 h-12 text-lg font-bold shrink-0"
+              onClick={() => update('defaultSetRowCount', Math.max(1, (settings.defaultSetRowCount ?? 3) - 1))}
+            >−</button>
+            <div className="flex-1 text-center">
+              <p className="text-3xl font-bold tabular-nums">{settings.defaultSetRowCount ?? 3}</p>
+            </div>
+            <button
+              className="btn-ghost w-12 h-12 text-lg font-bold shrink-0"
+              onClick={() => update('defaultSetRowCount', (settings.defaultSetRowCount ?? 3) + 1)}
+            >+</button>
+          </div>
+        </div>
+
         {/* Theme */}
         <div className="card">
           <div className="flex items-center gap-3 mb-3">
@@ -193,7 +215,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-600">NotHevy v0.2.5</p>
+        <p className="text-center text-xs text-slate-600">NotHevy v0.2.12</p>
       </div>
     </div>
   )

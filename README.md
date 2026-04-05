@@ -39,7 +39,14 @@ bun run preview
 
 ### AI Features
 
-Go to **Settings → Claude API Key** and enter your `sk-ant-api03-…` key. It is stored only in IndexedDB on your device and is never sent to any server other than Anthropic's API.
+Go to **Settings → AI Provider** and set provider, model, and API key. Keys are stored only in IndexedDB on your device and are sent only to the selected provider.
+
+### Local DB File (Committed)
+
+- A committed seed file lives at `public/local-db.json`
+- On first run (when Dexie is empty), the app imports this file automatically
+- Runtime data still persists in browser IndexedDB (`NotHevyDB`)
+- To update the committed seed, edit `public/local-db.json` and commit that file
 
 ## Tech Stack
 
@@ -57,6 +64,7 @@ Go to **Settings → Claude API Key** and enter your `sk-ant-api03-…` key. It 
 
 | Version | Notes |
 |---|---|
+| 0.2.12 | Add committed local DB seed file (`public/local-db.json`) and first-run bootstrap import |
 | 0.2.7 | Document GitHub remote URL in README |
 | 0.2.6 | Git repository setup; root `.gitignore` and `.gitattributes` for Vite/Node |
 | 0.1.0 | Initial implementation — full core loop, AI, PWA |
