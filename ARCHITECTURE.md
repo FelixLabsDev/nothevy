@@ -51,9 +51,19 @@ Exercise          ─── referenced by ──▶  ExerciseSlot
 WorkoutTemplate   ─── contains ────────▶  ExerciseSlot[]
 WorkoutSession    ─── deep-copy of ─────▶  PerformedSlot[] (with actual values)
 PersonalRecord    ─── links to ─────────▶  Exercise + WorkoutSession
+AppUser           ─── owns ─────────────▶  Exercise/Template/Session/PersonalRecord (ownerUserId)
+LinkedAuthAccount ─── maps provider IDs ▶  AppUser
+UserSettingRow    ─── per-user settings ▶  AppUser
 ```
 
 `PerformedSet extends SetTarget` — target values carried in, actual values written during session.
+
+### Account-Ready Schema (Future-Proofing)
+
+- `Dexie` schema `version(2)` adds `users`, `linkedAuthAccounts`, and `userSettings` tables.
+- Workout-domain tables now include optional `ownerUserId` indexes to support multi-account partitioning.
+- Migration backfills legacy rows with `ownerUserId = "local-default"` and ensures a default local user exists.
+- Current app behavior remains single-user local; these fields/tables are preparation for future auth/sync work.
 
 ## Active Session State Machine
 
@@ -71,15 +81,15 @@ navigate("/session/:id")
 
 Superset support: slots with matching `supersetGroupId` are meant to be executed round-robin. The cursor advances to the next slot in the group before starting rest.
 
-## AI (Claude API)
+## AI (LangChain)
 
-All calls happen **client-side** using `@anthropic-ai/sdk` with `dangerouslyAllowBrowser: true`. The user's API key is stored in Dexie settings and passed directly to the SDK.
+All calls happen **client-side** via `src/lib/ai.ts` using LangChain (`@langchain/anthropic`, `@langchain/openai`) with `dangerouslyAllowBrowser: true`. The user selects a provider (Claude / OpenAI / OpenRouter), optionally a custom model, and enters their API key in Settings. Keys are stored in Dexie settings only.
 
-| Feature | Model | Token budget |
+| Feature | Default model | Token budget |
 |---|---|---|
-| Template generation | claude-opus-4-5 | 2 048 |
-| In-session coaching | claude-haiku-4-5 | 512 |
-| Weekly insight | claude-haiku-4-5 | 1 024 |
+| Template generation | Provider capable-tier default | 2 048 |
+| In-session coaching | Provider fast-tier default | 512 |
+| Weekly insight | Provider fast-tier default | 1 024 |
 
 ## PWA
 

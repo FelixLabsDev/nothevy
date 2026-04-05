@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Exercise, WorkoutTemplate, WorkoutSession, PersonalRecord } from '@/types'
+import type { Exercise, WorkoutTemplate, WorkoutSession, PersonalRecord, AppUser, LinkedAuthAccount, UserSettingRow } from '@/types'
 
 // ---------------------------------------------------------------------------
 // Dexie database — single source of truth for all local data
@@ -10,6 +10,9 @@ class NotHevyDB extends Dexie {
   sessions!: Table<WorkoutSession, string>
   personalRecords!: Table<PersonalRecord, string>
   settings!: Table<{ key: string; value: unknown }, string>
+  users!: Table<AppUser, string>
+  linkedAuthAccounts!: Table<LinkedAuthAccount, string>
+  userSettings!: Table<UserSettingRow, string>
 
   constructor() {
     super('NotHevyDB')
@@ -19,6 +22,38 @@ class NotHevyDB extends Dexie {
       sessions:        'id, templateId, startedAt, completedAt',
       personalRecords: 'id, exerciseId, type, achievedAt',
       settings:        'key'
+    })
+
+    // Account-ready schema extension
+    this.version(2).stores({
+      exercises:          'id, ownerUserId, name, *muscleGroups, *tags, createdAt',
+      templates:          'id, ownerUserId, name, *tags, updatedAt',
+      sessions:           'id, ownerUserId, templateId, startedAt, completedAt',
+      personalRecords:    'id, ownerUserId, exerciseId, type, achievedAt',
+      settings:           'key',
+      users:              'id, email, isActive, createdAt, lastLoginAt',
+      linkedAuthAccounts: 'id, userId, provider, providerAccountId, [provider+providerAccountId]',
+      userSettings:       'id, userId, key, [userId+key]'
+    }).upgrade(async tx => {
+      const defaultUserId = 'local-default'
+
+      // Ensure a default local user exists so current single-user data has an owner.
+      const usersTable = tx.table('users')
+      const existingDefaultUser = await usersTable.get(defaultUserId)
+      if (!existingDefaultUser) {
+        await usersTable.put({
+          id: defaultUserId,
+          displayName: 'Local User',
+          createdAt: Date.now(),
+          isActive: true
+        } satisfies AppUser)
+      }
+
+      // Backfill ownerUserId for legacy rows to preserve deterministic ownership.
+      await tx.table('exercises').toCollection().modify((row: Exercise) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
+      await tx.table('templates').toCollection().modify((row: WorkoutTemplate) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
+      await tx.table('sessions').toCollection().modify((row: WorkoutSession) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
+      await tx.table('personalRecords').toCollection().modify((row: PersonalRecord) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
     })
   }
 }
@@ -56,6 +91,9 @@ type LocalDbSeed = {
   templates?: WorkoutTemplate[]
   sessions?: WorkoutSession[]
   personalRecords?: PersonalRecord[]
+  users?: AppUser[]
+  linkedAuthAccounts?: LinkedAuthAccount[]
+  userSettings?: UserSettingRow[]
   settings?: Record<string, unknown>
 }
 
@@ -84,6 +122,9 @@ export async function bootstrapDbFromLocalFile(path = '/local-db.json'): Promise
     if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
     if (seed.sessions?.length) await db.sessions.bulkPut(seed.sessions)
     if (seed.personalRecords?.length) await db.personalRecords.bulkPut(seed.personalRecords)
+    if (seed.users?.length) await db.users.bulkPut(seed.users)
+    if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
+    if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
     if (seed.settings) {
       const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
       if (rows.length) await db.settings.bulkPut(rows)

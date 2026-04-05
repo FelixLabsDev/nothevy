@@ -12,7 +12,7 @@ Fast, offline-first PWA workout tracker.
 - **Progressive overload** — automatic suggestions based on your last session for each exercise
 - **PR detection** — 1RM estimated (Epley formula) and tracked after every session
 - **History + charts** — volume-over-time area chart, session recaps, PR log
-- **Claude integration** — template generation, in-session coaching, and weekly insight (requires your own API key)
+- **Multi-provider AI** — template generation, in-session coaching, and weekly insight via Claude, OpenAI, or OpenRouter (requires your own API key)
 - **PWA** — installable, works fully offline after first load
 
 ## Getting Started
@@ -57,14 +57,20 @@ Go to **Settings → AI Provider** and set provider, model, and API key. Keys ar
 | State | Zustand |
 | Styling | Tailwind CSS |
 | PWA | vite-plugin-pwa |
-| AI | Claude API (client-side) |
+| AI | LangChain (Claude / OpenAI / OpenRouter) |
 | Charts | Recharts |
 
 ## Version History
 
 | Version | Notes |
 |---|---|
+| 0.4.0 | Add Export DB Seed button to Settings; remove dead claude.ts |
+| 0.3.0 | Add account-ready DB schema (`users`, linked accounts, user settings, ownerUserId indexes) with migration |
 | 0.2.12 | Add committed local DB seed file (`public/local-db.json`) and first-run bootstrap import |
+| 0.2.11 | Add media (images/videos) section to exercise editor with upload and URL fetch |
+| 0.2.10 | Refactor exercise set editor to per-set cards with rest stepper and no-rest option |
+| 0.2.9 | Add multi-provider AI via LangChain (Claude, OpenAI, OpenRouter) with custom model selection |
+| 0.2.8 | Add pull-up bar and rings to equipment list; fix underscore display in labels |
 | 0.2.7 | Document GitHub remote URL in README |
 | 0.2.6 | Git repository setup; root `.gitignore` and `.gitattributes` for Vite/Node |
 | 0.1.0 | Initial implementation — full core loop, AI, PWA |

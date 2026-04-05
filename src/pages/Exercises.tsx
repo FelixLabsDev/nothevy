@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus, Search, X, ImagePlus, Play, ZoomIn, Link, Upload, Loader2 } from 'lucide-react'
+import { Plus, Search, X, ImagePlus, Play, ZoomIn, Link, Upload, Loader2, RotateCcw } from 'lucide-react'
 import { nanoid } from '@/lib/workout'
 import { db } from '@/db'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -21,6 +21,30 @@ const blankSet = (type: SetType = 'reps', rest = 120): SetTarget => ({
   durationSeconds: type === 'timed' ? 30 : undefined,
   weight: undefined, weightUnit: 'kg', restSeconds: rest
 })
+
+type SetRow = SetTarget & { rowCount: number }
+
+const sameSetConfig = (a: SetTarget, b: SetTarget): boolean =>
+  a.type === b.type &&
+  a.reps === b.reps &&
+  a.durationSeconds === b.durationSeconds &&
+  a.weight === b.weight &&
+  a.weightUnit === b.weightUnit &&
+  a.restSeconds === b.restSeconds
+
+const toSetRows = (sets: SetTarget[], fallbackRest: number): SetRow[] => {
+  if (!sets.length) return [{ ...blankSet('reps', fallbackRest), rowCount: 1 }]
+  const rows: SetRow[] = []
+  for (const set of sets) {
+    const last = rows[rows.length - 1]
+    if (last && sameSetConfig(last, set)) {
+      last.rowCount += 1
+    } else {
+      rows.push({ ...set, rowCount: 1 })
+    }
+  }
+  return rows
+}
 
 const blank = (defaultRest = 120): Omit<Exercise, 'id' | 'createdAt'> => ({
   name: '', muscleGroups: [], equipment: [],
@@ -128,13 +152,14 @@ function Lightbox({ item, onClose }: { item: ExerciseMedia; onClose: () => void 
 export default function Exercises() {
   const { settings } = useSettingsStore()
   const defaultRest = settings.defaultRestSeconds ?? 120
+  const defaultSetRowCount = settings.defaultSetRowCount ?? 3
 
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [form, setForm] = useState(blank(defaultRest))
   const [tagInput, setTagInput] = useState('')
-  const [setCountInput, setSetCountInput] = useState(3)
+  const [setRows, setSetRows] = useState<SetRow[]>([{ ...blankSet('reps', defaultRest), rowCount: defaultSetRowCount }])
   const [lightbox, setLightbox] = useState<ExerciseMedia | null>(null)
 
   // Media picker state: null = closed, 'menu' = show options, 'url' = url input open
@@ -152,8 +177,15 @@ export default function Exercises() {
     e.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
   )
 
-  const openCreate = () => { setForm(blank(defaultRest)); setEditId(null); setShowForm(true) }
+  const openCreate = () => {
+    setForm(blank(defaultRest))
+    setSetRows([{ ...blankSet('reps', defaultRest), rowCount: defaultSetRowCount }])
+    setEditId(null)
+    setShowForm(true)
+  }
   const openEdit = (e: Exercise) => {
+    const rows = toSetRows(e.defaultSets?.length ? e.defaultSets : [blankSet(e.defaultSetType, e.defaultRestSeconds)], e.defaultRestSeconds)
+    setSetRows(rows.map(row => ({ ...row, rowCount: row.rowCount || 1 })))
     setForm({
       name: e.name, muscleGroups: e.muscleGroups, equipment: e.equipment,
       defaultSetType: e.defaultSetType, defaultRestSeconds: e.defaultRestSeconds,
@@ -167,12 +199,16 @@ export default function Exercises() {
 
   const save = async () => {
     if (!form.name.trim()) return
-    const firstSet = form.defaultSets[0]
+    const expandedSets: SetTarget[] = setRows.flatMap(row => {
+      const { rowCount, ...set } = row
+      return Array.from({ length: Math.max(1, rowCount) }, () => ({ ...set, id: nanoid() }))
+    })
+    const firstSet = expandedSets[0]
     const derived = {
       defaultSetType: firstSet?.type ?? form.defaultSetType,
       defaultRestSeconds: firstSet?.restSeconds ?? form.defaultRestSeconds
     }
-    const data = { ...form, ...derived }
+    const data = { ...form, defaultSets: expandedSets, ...derived }
     if (editId) {
       await db.exercises.update(editId, data)
     } else {
@@ -196,25 +232,19 @@ export default function Exercises() {
 
   // --- Default set mutations ---
   const updateSet = (idx: number, patch: Partial<SetTarget>) =>
-    setForm(f => ({ ...f, defaultSets: f.defaultSets.map((s, i) => i !== idx ? s : { ...s, ...patch }) }))
+    setSetRows(rows => rows.map((s, i) => i !== idx ? s : { ...s, ...patch }))
 
   const removeSet = (idx: number) =>
-    setForm(f => ({ ...f, defaultSets: f.defaultSets.filter((_, i) => i !== idx) }))
+    setSetRows(rows => rows.filter((_, i) => i !== idx))
 
   const addOneSet = () =>
-    setForm(f => {
-      const last = f.defaultSets[f.defaultSets.length - 1]
-      return { ...f, defaultSets: [...f.defaultSets, last ? { ...last, id: nanoid() } : blankSet(f.defaultSetType, f.defaultRestSeconds)] }
+    setSetRows(rows => {
+      const last = rows[rows.length - 1]
+      const next = last
+        ? { ...last, id: nanoid(), rowCount: defaultSetRowCount }
+        : { ...blankSet(form.defaultSetType, form.defaultRestSeconds), rowCount: defaultSetRowCount }
+      return [...rows, next]
     })
-
-  const addNSets = () => {
-    if (setCountInput < 1) return
-    setForm(f => {
-      const last = f.defaultSets[f.defaultSets.length - 1] ?? blankSet(f.defaultSetType, f.defaultRestSeconds)
-      const newSets = Array.from({ length: setCountInput }, () => ({ ...last, id: nanoid() }))
-      return { ...f, defaultSets: [...f.defaultSets, ...newSets] }
-    })
-  }
 
   // --- Media mutations ---
   const handleFiles = (files: FileList | null) => {
@@ -286,7 +316,7 @@ export default function Exercises() {
             <div className="flex-1 min-w-0">
               <p className="font-medium">{e.name}</p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {e.muscleGroups.map(m => <span key={m} className="chip">{m.replace('_', ' ')}</span>)}
+                {e.muscleGroups.map(m => <span key={m} className="chip">{m.replace(/_/g, ' ')}</span>)}
               </div>
               <div className="flex items-center gap-3 mt-1">
                 {e.defaultSets?.length > 0 && (
@@ -323,7 +353,12 @@ export default function Exercises() {
           <div className="bg-slate-900 rounded-t-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 pb-safe">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-lg">{editId ? 'Edit' : 'New'} Exercise</h2>
-              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-800"><X size={18} /></button>
+              <div className="flex items-center gap-2">
+                <button className="btn-primary text-sm px-3 py-2" onClick={save}>
+                  {editId ? 'Apply' : 'Add'}
+                </button>
+                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-800"><X size={18} /></button>
+              </div>
             </div>
 
             <div className="space-y-5">
@@ -344,7 +379,7 @@ export default function Exercises() {
                       className={`chip cursor-pointer ${form.muscleGroups.includes(m) ? 'bg-brand-700 text-brand-100' : ''}`}
                       onClick={() => setForm(f => ({ ...f, muscleGroups: toggleArr(f.muscleGroups, m) }))}
                     >
-                      {m.replace('_', ' ')}
+                      {m.replace(/_/g, ' ')}
                     </button>
                   ))}
                 </div>
@@ -360,7 +395,7 @@ export default function Exercises() {
                       className={`chip cursor-pointer ${form.equipment.includes(eq) ? 'bg-brand-700 text-brand-100' : ''}`}
                       onClick={() => setForm(f => ({ ...f, equipment: toggleArr(f.equipment, eq) }))}
                     >
-                      {eq.replace('_', ' ')}
+                      {eq.replace(/_/g, ' ')}
                     </button>
                   ))}
                 </div>
@@ -370,88 +405,88 @@ export default function Exercises() {
               <div>
                 <label className="text-xs text-slate-400 mb-2 block">Default Sets</label>
 
-                {/* Column headers */}
-                <div className="flex items-center gap-2 text-xs text-slate-500 mb-1 px-1">
-                  <span className="w-5 shrink-0" />
-                  <span className="w-24 shrink-0">Type</span>
-                  <span className="w-16 shrink-0">Reps/sec</span>
-                  <span className="w-16 shrink-0">Weight</span>
-                  <span className="flex-1">Rest</span>
-                </div>
-
                 <div className="space-y-2">
-                  {form.defaultSets.map((set, idx) => (
-                    <div key={set.id} className="flex items-center gap-2 text-sm">
-                      <span className="text-slate-500 w-5 shrink-0 text-center text-xs">{idx + 1}</span>
-                      <select
-                        className="input py-1.5 text-xs w-24 shrink-0"
-                        value={set.type}
-                        onChange={e => updateSet(idx, { type: e.target.value as SetType })}
-                      >
-                        <option value="reps">Reps</option>
-                        <option value="timed">Timed</option>
-                        <option value="failure">Failure</option>
-                      </select>
-                      {set.type === 'timed' ? (
-                        <input className="input py-1.5 w-16 shrink-0" type="number" placeholder="sec" min={1} step={5}
-                          value={set.durationSeconds ?? ''}
-                          onChange={e => updateSet(idx, { durationSeconds: +e.target.value })} />
-                      ) : (
-                        <input className="input py-1.5 w-16 shrink-0" type="number" placeholder="reps" min={1}
-                          value={set.reps ?? ''}
-                          onChange={e => updateSet(idx, { reps: +e.target.value })} />
-                      )}
-                      <input className="input py-1.5 w-16 shrink-0" type="number" placeholder="kg" min={0} step={2.5}
-                        value={set.weight ?? ''}
-                        onChange={e => updateSet(idx, { weight: e.target.value ? +e.target.value : undefined })} />
+                  {setRows.map((set, idx) => (
+                    <div key={set.id} className="rounded-xl bg-slate-800/60 border border-slate-700 px-3 py-2 space-y-2">
 
-                      {/* Rest stepper */}
-                      <div className="flex items-center gap-1 flex-1 min-w-0">
-                        <button
-                          className="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center shrink-0"
-                          onClick={() => updateSet(idx, { restSeconds: Math.max(0, set.restSeconds - 15) })}
-                        >−</button>
-                        <span className="text-xs tabular-nums text-slate-300 w-10 text-center shrink-0">
-                          {set.restSeconds === 0 ? 'None' : `${set.restSeconds}s`}
-                        </span>
-                        <button
-                          className="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center shrink-0"
-                          onClick={() => updateSet(idx, { restSeconds: set.restSeconds + 15 })}
-                        >+</button>
-                        {set.restSeconds > 0 && (
-                          <button
-                            className="text-xs text-slate-500 hover:text-brand-400 shrink-0 px-1"
-                            title="No rest"
-                            onClick={() => updateSet(idx, { restSeconds: 0 })}
-                          >✕</button>
+                      {/* Row 1: set number · type · reps/duration · weight · delete */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-500 text-xs w-4 shrink-0 text-center">{idx + 1}</span>
+                        <select
+                          className="input py-1 text-xs flex-1 min-w-0"
+                          value={set.type}
+                          onChange={e => updateSet(idx, { type: e.target.value as SetType })}
+                        >
+                          <option value="reps">Reps</option>
+                          <option value="timed">Timed</option>
+                          <option value="failure">Failure</option>
+                        </select>
+                        {set.type === 'timed' ? (
+                          <input className="input py-1 text-xs flex-1 min-w-0" type="number" placeholder="sec" min={1} step={5}
+                            value={set.durationSeconds ?? ''}
+                            onChange={e => updateSet(idx, { durationSeconds: +e.target.value })} />
+                        ) : (
+                          <input className="input py-1 text-xs flex-1 min-w-0" type="number" placeholder="reps" min={1}
+                            value={set.reps ?? ''}
+                            onChange={e => updateSet(idx, { reps: +e.target.value })} />
                         )}
+                        <input className="input py-1 text-xs flex-1 min-w-0" type="number" placeholder="kg" min={0} step={2.5}
+                          value={set.weight ?? ''}
+                          onChange={e => updateSet(idx, { weight: e.target.value ? +e.target.value : undefined })} />
+                        <button className="text-slate-600 hover:text-red-400 shrink-0 ml-1" onClick={() => removeSet(idx)}>
+                          <X size={14} />
+                        </button>
                       </div>
 
-                      <button className="text-slate-600 hover:text-red-400 shrink-0" onClick={() => removeSet(idx)}>
-                        <X size={14} />
-                      </button>
+                      {/* Row 2: sets count stepper · rest stepper */}
+                      <div className="flex items-center gap-4 pl-6">
+                        {/* Sets count */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-slate-500">Sets</span>
+                          <button
+                            className="w-5 h-5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center"
+                            onClick={() => setSetRows(rows => rows.map((r, i) => i !== idx ? r : { ...r, rowCount: Math.max(1, r.rowCount - 1) }))}
+                          >−</button>
+                          <span className="text-xs tabular-nums text-slate-200 w-4 text-center">{set.rowCount}</span>
+                          <button
+                            className="w-5 h-5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center"
+                            onClick={() => setSetRows(rows => rows.map((r, i) => i !== idx ? r : { ...r, rowCount: r.rowCount + 1 }))}
+                          >+</button>
+                        </div>
+
+                        <span className="text-slate-700 text-xs">·</span>
+
+                        {/* Rest stepper */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-slate-500">Rest</span>
+                          <button
+                            className="w-5 h-5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center"
+                            onClick={() => updateSet(idx, { restSeconds: Math.max(0, set.restSeconds - 15) })}
+                          >−</button>
+                          <span className="text-xs tabular-nums text-slate-200 w-10 text-center">
+                            {set.restSeconds === 0 ? 'None' : `${set.restSeconds}s`}
+                          </span>
+                          <button
+                            className="w-5 h-5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold flex items-center justify-center"
+                            onClick={() => updateSet(idx, { restSeconds: set.restSeconds + 15 })}
+                          >+</button>
+                          {set.restSeconds > 0 && (
+                            <button
+                              className="text-slate-500 hover:text-brand-400"
+                              title="No rest"
+                              onClick={() => updateSet(idx, { restSeconds: 0 })}
+                            ><RotateCcw size={11} /></button>
+                          )}
+                        </div>
+                      </div>
+
                     </div>
                   ))}
                 </div>
 
-                {/* Add sets row */}
-                <div className="flex items-center gap-3 mt-3">
-                  <button className="text-xs text-brand-400 flex items-center gap-1" onClick={addOneSet}>
-                    <Plus size={13} /> Add Set
-                  </button>
-                  <span className="text-slate-700">·</span>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      className="w-12 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center text-slate-200"
-                      type="number" min={1} max={20}
-                      value={setCountInput}
-                      onChange={e => setSetCountInput(+e.target.value)}
-                    />
-                    <button className="text-xs text-brand-400" onClick={addNSets}>
-                      Add {setCountInput} sets
-                    </button>
-                  </div>
-                </div>
+                <button className="text-xs text-brand-400 flex items-center gap-1 mt-3" onClick={addOneSet}>
+                  <Plus size={13} /> Add Set
+                </button>
               </div>
 
               {/* Media */}
@@ -579,10 +614,11 @@ export default function Exercises() {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            {/* Sticky action bar so add/apply is always visible */}
+            <div className="sticky bottom-0 -mx-5 mt-6 px-5 pt-3 pb-safe bg-slate-900/95 backdrop-blur border-t border-slate-800 flex gap-3">
               <button className="btn-ghost flex-1" onClick={() => setShowForm(false)}>Cancel</button>
               <button className="btn-primary flex-1" onClick={save}>
-                {editId ? 'Save Changes' : 'Create Exercise'}
+                {editId ? 'Apply Changes' : 'Add Exercise'}
               </button>
             </div>
           </div>

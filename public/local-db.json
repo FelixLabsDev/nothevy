@@ -1,17 +1,155 @@
 {
   "meta": {
     "name": "NotHevy Local DB Seed",
-    "version": 1
+    "version": 2
   },
-  "exercises": [],
+  "exercises": [
+    {
+      "name": "Lat pulldown",
+      "muscleGroups": [
+        "back"
+      ],
+      "equipment": [
+        "machine"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "5W7WHYnyC10-FWYyPacxw",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "14mQmMdnTgOr56uu3OQpi",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "pZISwxtkEKIITsSVZhWMD",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [],
+      "instructions": "Note grip style",
+      "tags": [],
+      "id": "1vf9jOO6_rdrH93nVCr8k",
+      "createdAt": 1775421572525,
+      "ownerUserId": "local-default"
+    },
+    {
+      "name": "Pull up",
+      "muscleGroups": [
+        "back"
+      ],
+      "equipment": [
+        "pull_up_bar"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "DfaYDJpvSKk0rtWppakwJ",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "DjDRwmZ1j3y6-sznTTpDL",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "nqLH7ZazFA3Rg9VnEUAN8",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "Ei_KoEXLfqVQtT3l0OH9g",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [],
+      "instructions": "",
+      "tags": [],
+      "id": "GTIi2hc9e0_HME1JsRJI5",
+      "createdAt": 1775421423220,
+      "ownerUserId": "local-default"
+    },
+    {
+      "name": "Shoulder dumbbell press",
+      "muscleGroups": [
+        "shoulders"
+      ],
+      "equipment": [
+        "dumbbell"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "nYhSdSnl9588ROK2vsqHt",
+          "type": "reps",
+          "reps": 10,
+          "weight": 27.5,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "5LBTn3VlJhVInr4kbi10y",
+          "type": "reps",
+          "reps": 10,
+          "weight": 27.5,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "M1eA3mRaj5bA4A0jrNfsf",
+          "type": "reps",
+          "reps": 10,
+          "weight": 27.5,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [],
+      "instructions": "",
+      "tags": [],
+      "id": "keZTUnHHZPeuOztui-Cs1",
+      "createdAt": 1775421652721,
+      "ownerUserId": "local-default"
+    }
+  ],
   "templates": [],
   "sessions": [],
   "personalRecords": [],
+  "users": [
+    {
+      "id": "local-default",
+      "displayName": "Local User",
+      "createdAt": 1775423267271,
+      "isActive": true
+    }
+  ],
+  "linkedAuthAccounts": [],
+  "userSettings": [],
   "settings": {
-    "defaultWeightUnit": "kg",
     "defaultRestSeconds": 120,
-    "defaultSetRowCount": 3,
-    "theme": "dark",
-    "aiProvider": "claude"
+    "theme": "dark"
   }
 }

@@ -22,6 +22,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     const defaults: Partial<AppSettings> = {
       defaultWeightUnit: 'kg',
       defaultRestSeconds: 120,
+      defaultSetRowCount: 3,
       theme: 'dark',
       aiProvider: 'claude'
     }

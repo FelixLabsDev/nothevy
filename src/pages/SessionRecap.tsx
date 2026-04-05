@@ -60,7 +60,7 @@ export default function SessionRecap() {
           </div>
           {prs.map(pr => (
             <div key={pr.id} className="text-sm text-yellow-200">
-              {exName(pr.exerciseId)} — {pr.type.replace('_', ' ')}: {pr.value.toFixed(1)}
+              {exName(pr.exerciseId)} — {pr.type.replace(/_/g, ' ')}: {pr.value.toFixed(1)}
             </div>
           ))}
         </div>

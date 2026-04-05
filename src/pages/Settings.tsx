@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Moon, Dumbbell, Clock, Key, Eye, EyeOff, Bot } from 'lucide-react'
+import { Moon, Dumbbell, Clock, Eye, EyeOff, Bot, Download } from 'lucide-react'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { db } from '@/db'
 import PageHeader from '@/components/PageHeader'
 import type { AIProvider } from '@/types'
 
@@ -22,6 +23,43 @@ const PROVIDERS: { id: AIProvider; label: string }[] = [
   { id: 'openai',     label: 'OpenAI' },
   { id: 'openrouter', label: 'OpenRouter' }
 ]
+
+// ---------------------------------------------------------------------------
+// Export full DB to downloadable local-db.json seed file
+// ---------------------------------------------------------------------------
+async function exportDbSeed(): Promise<void> {
+  const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows] = await Promise.all([
+    db.exercises.toArray(),
+    db.templates.toArray(),
+    db.sessions.toArray(),
+    db.personalRecords.toArray(),
+    db.users.toArray(),
+    db.linkedAuthAccounts.toArray(),
+    db.userSettings.toArray(),
+    db.settings.toArray()
+  ])
+
+  const seed = {
+    meta: { name: 'NotHevy Local DB Seed', version: 2 },
+    // Blobs cannot be represented in JSON — strip media attachments from exercises
+    exercises: exercises.map(e => ({ ...e, media: [] })),
+    templates,
+    sessions,
+    personalRecords,
+    users,
+    linkedAuthAccounts,
+    userSettings,
+    settings: Object.fromEntries(settingsRows.map(r => [r.key, r.value]))
+  }
+
+  const blob = new Blob([JSON.stringify(seed, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'local-db.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 export default function Settings() {
   const { settings, update } = useSettingsStore()
@@ -215,7 +253,24 @@ export default function Settings() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-600">NotHevy v0.2.12</p>
+        {/* Export DB seed */}
+        <div className="card">
+          <div className="flex items-center gap-3 mb-3">
+            <Download size={18} className="text-brand-400" />
+            <span className="font-semibold">Export DB Seed</span>
+          </div>
+          <p className="text-xs text-slate-400 mb-3">
+            Downloads your current exercises, templates and settings as <code className="text-brand-400">local-db.json</code>.
+            Replace <code className="text-slate-300">public/local-db.json</code> with this file and commit it to seed fresh installs.
+            Attached media is excluded (blobs cannot be stored in JSON).
+          </p>
+          <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={exportDbSeed}>
+            <Download size={15} />
+            Download local-db.json
+          </button>
+        </div>
+
+        <p className="text-center text-xs text-slate-600">NotHevy v0.4.0</p>
       </div>
     </div>
   )

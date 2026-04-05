@@ -17,6 +17,36 @@ export type Equipment =
 export type WeightUnit = 'kg' | 'lbs'
 
 // ---------------------------------------------------------------------------
+// Account types — schema foundation for future multi-account support
+// ---------------------------------------------------------------------------
+export type AuthProvider = 'local' | 'google' | 'apple' | 'github' | 'email'
+
+export interface AppUser {
+  id: string
+  email?: string
+  displayName?: string
+  avatarUrl?: string
+  createdAt: number
+  lastLoginAt?: number
+  isActive: boolean
+}
+
+export interface LinkedAuthAccount {
+  id: string
+  userId: string
+  provider: AuthProvider
+  providerAccountId: string
+  createdAt: number
+}
+
+export interface UserSettingRow {
+  id: string                 // `${userId}:${key}`
+  userId: string
+  key: string
+  value: unknown
+}
+
+// ---------------------------------------------------------------------------
 // ExerciseMedia — images and videos attached to an exercise, stored as Blobs
 // ---------------------------------------------------------------------------
 export interface ExerciseMedia {
@@ -33,6 +63,7 @@ export interface ExerciseMedia {
 // ---------------------------------------------------------------------------
 export interface Exercise {
   id: string
+  ownerUserId?: string
   name: string
   muscleGroups: MuscleGroup[]
   equipment: Equipment[]
@@ -72,6 +103,7 @@ export interface ExerciseSlot {
 // ---------------------------------------------------------------------------
 export interface WorkoutTemplate {
   id: string
+  ownerUserId?: string
   name: string
   description?: string
   tags: string[]
@@ -99,6 +131,7 @@ export interface PerformedSlot extends Omit<ExerciseSlot, 'sets'> {
 
 export interface WorkoutSession {
   id: string
+  ownerUserId?: string
   templateId?: string
   name: string
   startedAt: number
@@ -113,6 +146,7 @@ export interface WorkoutSession {
 // ---------------------------------------------------------------------------
 export interface PersonalRecord {
   id: string
+  ownerUserId?: string
   exerciseId: string
   type: '1rm' | 'max_reps_at_weight' | 'max_volume_session'
   value: number
@@ -128,6 +162,7 @@ export type AIProvider = 'claude' | 'openai' | 'openrouter'
 export interface AppSettings {
   defaultWeightUnit: WeightUnit
   defaultRestSeconds: number
+  defaultSetRowCount: number
   theme: 'dark' | 'light' | 'system'
   aiProvider: AIProvider
   aiApiKey?: string
