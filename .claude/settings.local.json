@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"require\\('./node_modules/react-markdown/package.json'\\) && console.log\\('ok'\\)\")",
+      "Bash(npm run:*)",
+      "Bash(pm2 list:*)",
+      "Bash(systemctl list-units:*)",
+      "Read(//etc/nginx/**)",
+      "Bash(nginx -T)",
+      "Bash(ls /home/ubuntu/apps/NotHevy/*.dockerfile /home/ubuntu/apps/NotHevy/Dockerfile /home/ubuntu/apps/NotHevy/docker-compose*)",
+      "Bash(ls /home/ubuntu/apps/NotHevy/deploy* /home/ubuntu/apps/NotHevy/nginx*)",
+      "Bash(curl:*)",
+      "Read(//etc/systemd/system/**)",
+      "Read(//home/ubuntu/.config/systemd/**)",
+      "Read(//etc/**)",
+      "Bash(npm list:*)",
+      "Bash(sudo npm:*)"
+    ]
+  }
+}

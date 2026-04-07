@@ -19,6 +19,7 @@ interface ActiveSessionStore {
   startAdHocSession: (name: string) => void
   completeSet: (slotIdx: number, setIdx: number, updates: Partial<PerformedSet>) => void
   skipSet: (slotIdx: number, setIdx: number) => void
+  selectVariation: (slotIdx: number, variation: string | undefined) => void
   advanceCursor: () => void
   startRestTimer: (seconds: number) => void
   adjustRestTimer: (delta: number) => void
@@ -100,6 +101,15 @@ export const useActiveSessionStore = create<ActiveSessionStore>((set, get) => ({
         )
       }
     })
+    set({ session: { ...session, slots } })
+  },
+
+  selectVariation: (slotIdx, variation) => {
+    const { session } = get()
+    if (!session) return
+    const slots = session.slots.map((slot, si) =>
+      si !== slotIdx ? slot : { ...slot, selectedVariation: variation }
+    )
     set({ session: { ...session, slots } })
   },
 

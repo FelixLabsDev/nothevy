@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { getAllSettings, setSetting } from '@/db'
 import type { AppSettings } from '@/types'
+import { DEFAULT_MUSCLE_GROUPS, DEFAULT_EQUIPMENT } from '@/types'
 
 // ---------------------------------------------------------------------------
 // Settings store — wraps Dexie settings table, hydrated on app start
@@ -24,7 +25,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       defaultRestSeconds: 120,
       defaultSetRowCount: 3,
       theme: 'dark',
-      aiProvider: 'claude'
+      aiProvider: 'claude',
+      muscleGroups: DEFAULT_MUSCLE_GROUPS,
+      equipment: DEFAULT_EQUIPMENT
     }
     set({ settings: { ...defaults, ...settings }, loaded: true })
   },

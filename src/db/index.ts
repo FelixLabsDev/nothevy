@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Exercise, WorkoutTemplate, WorkoutSession, PersonalRecord, AppUser, LinkedAuthAccount, UserSettingRow } from '@/types'
+import type { Exercise, WorkoutTemplate, WorkoutSession, PersonalRecord, AppUser, LinkedAuthAccount, UserSettingRow, Doc } from '@/types'
 
 // ---------------------------------------------------------------------------
 // Dexie database — single source of truth for all local data
@@ -13,6 +13,7 @@ class NotHevyDB extends Dexie {
   users!: Table<AppUser, string>
   linkedAuthAccounts!: Table<LinkedAuthAccount, string>
   userSettings!: Table<UserSettingRow, string>
+  docs!: Table<Doc, string>
 
   constructor() {
     super('NotHevyDB')
@@ -54,6 +55,19 @@ class NotHevyDB extends Dexie {
       await tx.table('templates').toCollection().modify((row: WorkoutTemplate) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
       await tx.table('sessions').toCollection().modify((row: WorkoutSession) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
       await tx.table('personalRecords').toCollection().modify((row: PersonalRecord) => { if (!row.ownerUserId) row.ownerUserId = defaultUserId })
+    })
+
+    // Docs table
+    this.version(3).stores({
+      exercises:          'id, ownerUserId, name, *muscleGroups, *tags, createdAt',
+      templates:          'id, ownerUserId, name, *tags, updatedAt',
+      sessions:           'id, ownerUserId, templateId, startedAt, completedAt',
+      personalRecords:    'id, ownerUserId, exerciseId, type, achievedAt',
+      settings:           'key',
+      users:              'id, email, isActive, createdAt, lastLoginAt',
+      linkedAuthAccounts: 'id, userId, provider, providerAccountId, [provider+providerAccountId]',
+      userSettings:       'id, userId, key, [userId+key]',
+      docs:               'id, title, updatedAt'
     })
   }
 }

@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Dumbbell, ClipboardList, History, Settings } from 'lucide-react'
+import { LayoutDashboard, Dumbbell, ClipboardList, History, Settings, FileText } from 'lucide-react'
 
 const tabs = [
   { to: '/',          label: 'Home',      Icon: LayoutDashboard },
   { to: '/exercises', label: 'Exercises', Icon: Dumbbell },
   { to: '/templates', label: 'Templates', Icon: ClipboardList },
   { to: '/history',   label: 'History',   Icon: History },
+  { to: '/docs',      label: 'Docs',      Icon: FileText },
   { to: '/settings',  label: 'Settings',  Icon: Settings }
 ]
 

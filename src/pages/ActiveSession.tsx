@@ -7,7 +7,7 @@ import { useActiveSessionStore } from '@/stores/sessionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { getProgressionSuggestion } from '@/lib/workout'
 import { getSessionCoaching } from '@/lib/ai'
-import type { PerformedSet } from '@/types'
+import type { Exercise, PerformedSet } from '@/types'
 
 // Format seconds as MM:SS
 function fmtTime(s: number): string {
@@ -22,7 +22,7 @@ export default function ActiveSession() {
   const {
     session, currentSlotIndex, currentSetIndex,
     restSecondsRemaining, restTimerActive,
-    completeSet, skipSet, advanceCursor,
+    completeSet, skipSet, selectVariation, advanceCursor,
     startRestTimer, tickRestTimer, stopRestTimer, adjustRestTimer,
     endSession, clearSession, newPRExerciseIds
   } = useActiveSessionStore()
@@ -63,14 +63,15 @@ export default function ActiveSession() {
   // Fetch exercise name for display
   const AllExerciseIds = [...new Set(session.slots.map(s => s.exerciseId))]
 
-  // Resolve exercise names eagerly in the component via a ref-style cache
-  const exerciseCache = useRef<Record<string, string>>({})
+  // Resolve exercise data eagerly via a ref-style cache
+  const exerciseCache = useRef<Record<string, Exercise>>({})
   useLiveQuery(async () => {
     const exs = await db.exercises.bulkGet(AllExerciseIds)
-    exs.forEach(e => { if (e) exerciseCache.current[e.id] = e.name })
+    exs.forEach(e => { if (e) exerciseCache.current[e.id] = e })
   }, [AllExerciseIds.join(',')])
 
-  const exName = (id: string) => exerciseCache.current[id] ?? id
+  const exName = (id: string) => exerciseCache.current[id]?.name ?? id
+  const exVariations = (id: string) => exerciseCache.current[id]?.variations ?? []
 
   // Progressive overload suggestion for current exercise
   const [suggestion, setSuggestion] = useState<{ weight: number; reps: number; unit: string } | null>(null)
@@ -209,8 +210,32 @@ export default function ActiveSession() {
             </p>
             <p className="text-xs text-slate-500">Set {currentSetIndex + 1} / {currentSlot.sets.length}</p>
           </div>
-          <h2 className="text-xl font-bold mb-1">{exName(currentSlot.exerciseId)}</h2>
-          {currentSlot.notes && <p className="text-xs text-slate-400 mb-3">{currentSlot.notes}</p>}
+          <h2 className="text-xl font-bold mb-1">
+            {exName(currentSlot.exerciseId)}
+            {currentSlot.selectedVariation && (
+              <span className="text-brand-400 font-normal text-base"> — {currentSlot.selectedVariation}</span>
+            )}
+          </h2>
+          {currentSlot.notes && <p className="text-xs text-slate-400 mb-2">{currentSlot.notes}</p>}
+
+          {/* Variation picker */}
+          {exVariations(currentSlot.exerciseId).length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {exVariations(currentSlot.exerciseId).map(v => (
+                <button
+                  key={v}
+                  onClick={() => selectVariation(currentSlotIndex, currentSlot.selectedVariation === v ? undefined : v)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition border ${
+                    currentSlot.selectedVariation === v
+                      ? 'bg-brand-700 border-brand-500 text-brand-100'
+                      : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                  }`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Progressive overload suggestion */}
           {suggestion && (
@@ -298,6 +323,9 @@ export default function ActiveSession() {
               <div className="flex items-center justify-between">
                 <p className={`font-medium text-sm ${isCurrent ? 'text-brand-300' : 'text-slate-300'}`}>
                   {exName(slot.exerciseId) || 'Unknown'}
+                  {slot.selectedVariation && (
+                    <span className="text-slate-500 font-normal"> — {slot.selectedVariation}</span>
+                  )}
                 </p>
                 <p className="text-xs text-slate-500">{doneCount}/{slot.sets.length} sets</p>
               </div>

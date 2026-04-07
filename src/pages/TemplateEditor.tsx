@@ -7,6 +7,7 @@ import { nanoid } from '@/lib/workout'
 import { generateTemplate } from '@/lib/ai'
 import { useSettingsStore } from '@/stores/settingsStore'
 import PageHeader from '@/components/PageHeader'
+import ExerciseFormSheet from '@/components/ExerciseFormSheet'
 import type { WorkoutTemplate, ExerciseSlot, SetTarget } from '@/types'
 
 // Blank set with global default rest
@@ -42,6 +43,7 @@ export default function TemplateEditor() {
   const [aiGoal, setAiGoal] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
+  const [newExerciseForSlot, setNewExerciseForSlot] = useState<number | null>(null)
 
   // Hydrate form when editing an existing template
   useEffect(() => {
@@ -182,6 +184,13 @@ export default function TemplateEditor() {
                   <option value="">— Select exercise —</option>
                   {exercises?.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                 </select>
+                <button
+                  title="Create new exercise"
+                  onClick={() => setNewExerciseForSlot(si)}
+                  className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-500 hover:text-brand-400 shrink-0"
+                >
+                  <Plus size={16} />
+                </button>
                 <button onClick={() => removeSlot(si)} className="p-1.5 rounded-lg hover:bg-red-900/30 text-slate-500 hover:text-red-400">
                   <X size={16} />
                 </button>
@@ -218,6 +227,16 @@ export default function TemplateEditor() {
       <button className="btn-ghost w-full" onClick={addSlot}>
         <Plus size={16} /> Add Exercise
       </button>
+
+      {newExerciseForSlot !== null && (
+        <ExerciseFormSheet
+          onClose={() => setNewExerciseForSlot(null)}
+          onSaved={id => {
+            setExercise(newExerciseForSlot, id)
+            setNewExerciseForSlot(null)
+          }}
+        />
+      )}
     </div>
   )
 }

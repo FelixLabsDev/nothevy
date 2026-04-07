@@ -2,17 +2,18 @@
 
 export type SetType = 'reps' | 'timed' | 'failure'
 
-export type MuscleGroup =
-  | 'chest' | 'back' | 'shoulders'
-  | 'biceps' | 'triceps' | 'forearms'
-  | 'quads' | 'hamstrings' | 'glutes' | 'calves'
-  | 'core' | 'traps' | 'lats' | 'full_body'
+export type MuscleGroup = string
+export type Equipment = string
 
-export type Equipment =
-  | 'barbell' | 'dumbbell' | 'kettlebell'
-  | 'cable' | 'machine' | 'bodyweight'
-  | 'resistance_band' | 'smith_machine'
-  | 'pull_up_bar' | 'rings' | 'other'
+export const DEFAULT_MUSCLE_GROUPS: string[] = [
+  'chest', 'back', 'shoulders', 'biceps', 'triceps', 'forearms',
+  'quads', 'hamstrings', 'glutes', 'calves', 'core', 'traps', 'lats', 'full_body'
+]
+
+export const DEFAULT_EQUIPMENT: string[] = [
+  'barbell', 'dumbbell', 'kettlebell', 'cable', 'machine', 'bodyweight',
+  'resistance_band', 'smith_machine', 'pull_up_bar', 'rings', 'other'
+]
 
 export type WeightUnit = 'kg' | 'lbs'
 
@@ -73,6 +74,7 @@ export interface Exercise {
   media: ExerciseMedia[]          // attached images / videos
   instructions?: string
   tags: string[]
+  variations?: string[]           // e.g. ['Wide Grip', 'Close Grip', 'Incline']
   createdAt: number
 }
 
@@ -96,6 +98,7 @@ export interface ExerciseSlot {
   orderIndex: number
   sets: SetTarget[]
   notes?: string
+  selectedVariation?: string      // chosen variation for this slot during a session
 }
 
 // ---------------------------------------------------------------------------
@@ -155,6 +158,17 @@ export interface PersonalRecord {
 }
 
 // ---------------------------------------------------------------------------
+// Doc — user-created markdown document
+// ---------------------------------------------------------------------------
+export interface Doc {
+  id: string
+  title: string
+  content: string   // raw markdown
+  createdAt: number
+  updatedAt: number
+}
+
+// ---------------------------------------------------------------------------
 // AppSettings — key/value pairs stored in Dexie
 // ---------------------------------------------------------------------------
 export type AIProvider = 'claude' | 'openai' | 'openrouter'
@@ -167,4 +181,6 @@ export interface AppSettings {
   aiProvider: AIProvider
   aiApiKey?: string
   aiModel?: string   // empty = use provider default
+  muscleGroups?: string[]
+  equipment?: string[]
 }

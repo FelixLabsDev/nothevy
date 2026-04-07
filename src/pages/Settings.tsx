@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Moon, Dumbbell, Clock, Eye, EyeOff, Bot, Download } from 'lucide-react'
+import { Moon, Dumbbell, Clock, Eye, EyeOff, Bot, Download, X, Plus, RotateCcw } from 'lucide-react'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { db } from '@/db'
 import PageHeader from '@/components/PageHeader'
 import type { AIProvider } from '@/types'
+import { DEFAULT_MUSCLE_GROUPS, DEFAULT_EQUIPMENT } from '@/types'
 
 // Default model placeholder shown per provider when no custom model is set
 const PROVIDER_DEFAULTS: Record<AIProvider, string> = {
@@ -67,6 +68,29 @@ export default function Settings() {
   const [showKey, setShowKey] = useState(false)
   const [keyInput, setKeyInput] = useState(settings.aiApiKey ?? '')
   const [modelInput, setModelInput] = useState(settings.aiModel ?? '')
+  const [muscleInput, setMuscleInput] = useState('')
+  const [equipmentInput, setEquipmentInput] = useState('')
+
+  const currentMuscles = settings.muscleGroups ?? DEFAULT_MUSCLE_GROUPS
+  const currentEquipment = settings.equipment ?? DEFAULT_EQUIPMENT
+
+  const addMuscle = () => {
+    const val = muscleInput.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!val || currentMuscles.includes(val)) return
+    update('muscleGroups', [...currentMuscles, val])
+    setMuscleInput('')
+  }
+  const removeMuscle = (m: string) =>
+    update('muscleGroups', currentMuscles.filter(x => x !== m))
+
+  const addEquipment = () => {
+    const val = equipmentInput.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!val || currentEquipment.includes(val)) return
+    update('equipment', [...currentEquipment, val])
+    setEquipmentInput('')
+  }
+  const removeEquipment = (e: string) =>
+    update('equipment', currentEquipment.filter(x => x !== e))
 
   // Keep inputs in sync when settings hydrate from DB
   useEffect(() => { setKeyInput(settings.aiApiKey ?? '') }, [settings.aiApiKey])
@@ -250,6 +274,82 @@ export default function Settings() {
             <p className="text-xs text-slate-500 mt-1">
               Stored locally in IndexedDB only — never sent to any server other than the provider.
             </p>
+          </div>
+        </div>
+
+        {/* Muscle groups */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <Dumbbell size={18} className="text-brand-400" />
+              <span className="font-semibold">Muscle Groups</span>
+            </div>
+            <button
+              className="text-xs text-slate-500 hover:text-brand-400 flex items-center gap-1"
+              onClick={() => update('muscleGroups', DEFAULT_MUSCLE_GROUPS)}
+            >
+              <RotateCcw size={12} /> Reset
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {currentMuscles.map(m => (
+              <span key={m} className="chip gap-1">
+                {m.replace(/_/g, ' ')}
+                <button onClick={() => removeMuscle(m)} className="text-slate-500 hover:text-red-400">
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="input flex-1 text-sm"
+              placeholder="e.g. neck"
+              value={muscleInput}
+              onChange={e => setMuscleInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addMuscle() } }}
+            />
+            <button className="btn-ghost text-sm shrink-0" onClick={addMuscle}>
+              <Plus size={15} /> Add
+            </button>
+          </div>
+        </div>
+
+        {/* Equipment */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <Dumbbell size={18} className="text-brand-400" />
+              <span className="font-semibold">Equipment</span>
+            </div>
+            <button
+              className="text-xs text-slate-500 hover:text-brand-400 flex items-center gap-1"
+              onClick={() => update('equipment', DEFAULT_EQUIPMENT)}
+            >
+              <RotateCcw size={12} /> Reset
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {currentEquipment.map(eq => (
+              <span key={eq} className="chip gap-1">
+                {eq.replace(/_/g, ' ')}
+                <button onClick={() => removeEquipment(eq)} className="text-slate-500 hover:text-red-400">
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="input flex-1 text-sm"
+              placeholder="e.g. trap bar"
+              value={equipmentInput}
+              onChange={e => setEquipmentInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addEquipment() } }}
+            />
+            <button className="btn-ghost text-sm shrink-0" onClick={addEquipment}>
+              <Plus size={15} /> Add
+            </button>
           </div>
         </div>
 
