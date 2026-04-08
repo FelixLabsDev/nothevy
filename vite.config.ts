@@ -30,5 +30,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') }
+  },
+  server: {
+    port: 5058,
+    strictPort: true,
+    allowedHosts: ['nothevy.felixlabs.net'],
+    // Proxy /api/* to the local Express DB server
+    proxy: { '/api': 'http://localhost:3001' }
   }
 })

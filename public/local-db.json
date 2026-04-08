@@ -1,7 +1,7 @@
 {
   "meta": {
-    "name": "NotHevy Local DB Seed",
-    "version": 2
+    "name": "NotHevyDB",
+    "version": 3
   },
   "exercises": [
     {
@@ -16,21 +16,21 @@
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "5W7WHYnyC10-FWYyPacxw",
+          "id": "rtt8Tlk60WVJOjtFcWWxi",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "14mQmMdnTgOr56uu3OQpi",
+          "id": "QeYcJoxuc73yVeL1lP-ae",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "pZISwxtkEKIITsSVZhWMD",
+          "id": "cgw0i9cVncIEyZDI5ESq-",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
@@ -42,7 +42,93 @@
       "tags": [],
       "id": "1vf9jOO6_rdrH93nVCr8k",
       "createdAt": 1775421572525,
-      "ownerUserId": "local-default"
+      "ownerUserId": "local-default",
+      "variations": []
+    },
+    {
+      "name": "Squat",
+      "muscleGroups": [
+        "legs"
+      ],
+      "equipment": [],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "bs2V4CyRs2LhF1sPAZtGV",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "X16xM0l4DfppV6NhxVuxt",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "KidOnKlWUBkda_XFcTSy_",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [],
+      "instructions": "",
+      "tags": [],
+      "variations": [],
+      "id": "BWLnDpmKI3F0Yoy6mYhub",
+      "createdAt": 1775643411249
+    },
+    {
+      "name": "Chest press",
+      "muscleGroups": [
+        "chest"
+      ],
+      "equipment": [
+        "barbell",
+        "dumbbell",
+        "machine"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "LSXt15lqeahMuRAsvGaRS",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "8b-wEY3xTRXnL0XcBCARs",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "C9DlU1ALehNXdu4oX6WAx",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [],
+      "instructions": "",
+      "tags": [],
+      "variations": [
+        "Incline",
+        "Flat",
+        "Dumbbell",
+        "Barbell"
+      ],
+      "id": "CGW9PWdlJ5BMAfaICfsU1",
+      "createdAt": 1775585306440
     },
     {
       "name": "Pull up",
@@ -150,6 +236,24 @@
   "userSettings": [],
   "settings": {
     "defaultRestSeconds": 120,
+    "muscleGroups": [
+      "chest",
+      "back",
+      "shoulders",
+      "biceps",
+      "triceps",
+      "forearms",
+      "quads",
+      "hamstrings",
+      "glutes",
+      "calves",
+      "core",
+      "traps",
+      "lats",
+      "full_body",
+      "legs"
+    ],
     "theme": "dark"
-  }
+  },
+  "docs": []
 }

@@ -75,6 +75,22 @@ class NotHevyDB extends Dexie {
 export const db = new NotHevyDB()
 
 // ---------------------------------------------------------------------------
+// Auto-sync state — managed externally by SyncWatcher (React component).
+// _isLoading flag prevents sync during loadFromFile() bulk writes.
+// ---------------------------------------------------------------------------
+export let _isLoading = false
+let _syncTimer: ReturnType<typeof setTimeout> | null = null
+
+export function scheduleSyncToFile() {
+  if (_isLoading) return
+  if (_syncTimer) clearTimeout(_syncTimer)
+  _syncTimer = setTimeout(() => void syncToFile(), 800)
+}
+
+// Expose manual trigger on window for emergency console access
+if (typeof window !== 'undefined') (window as Record<string, unknown>).syncToFile = () => syncToFile()
+
+// ---------------------------------------------------------------------------
 // Settings helpers — typed get/set wrappers
 // ---------------------------------------------------------------------------
 export async function getSetting<K extends keyof import('@/types').AppSettings>(
@@ -97,10 +113,10 @@ export async function getAllSettings(): Promise<Partial<import('@/types').AppSet
 }
 
 // ---------------------------------------------------------------------------
-// Local file seed bootstrap — load data from committed public/local-db.json
-// on first run when DB is empty.
+// DB seed shape — shared by loadFromFile and syncToFile
 // ---------------------------------------------------------------------------
 type LocalDbSeed = {
+  meta?: { name: string; version: number }
   exercises?: Array<Omit<Exercise, 'media'> & { media?: Exercise['media'] }>
   templates?: WorkoutTemplate[]
   sessions?: WorkoutSession[]
@@ -109,41 +125,120 @@ type LocalDbSeed = {
   linkedAuthAccounts?: LinkedAuthAccount[]
   userSettings?: UserSettingRow[]
   settings?: Record<string, unknown>
+  docs?: Doc[]
 }
 
 function normalizeExerciseMedia(exercise: Omit<Exercise, 'media'> & { media?: Exercise['media'] }): Exercise {
   return { ...exercise, media: exercise.media ?? [] }
 }
 
-export async function bootstrapDbFromLocalFile(path = '/local-db.json'): Promise<void> {
-  const counts = await Promise.all([
-    db.exercises.count(),
-    db.templates.count(),
-    db.sessions.count(),
-    db.personalRecords.count(),
-    db.settings.count()
-  ])
-
-  // If anything exists already, treat DB as initialized.
-  if (counts.some(c => c > 0)) return
-
+// ---------------------------------------------------------------------------
+// loadFromFile — always loads fresh from /api/db (local file via API server).
+// Falls back to the static public/local-db.json seed on first run only if the
+// API server is unavailable (e.g. production build / PWA).
+// ---------------------------------------------------------------------------
+export async function loadFromFile(): Promise<void> {
   try {
-    const response = await fetch(path, { cache: 'no-store' })
+    const response = await fetch('/api/db', { cache: 'no-store' })
+    if (!response.ok) throw new Error('API not available')
+    const seed = await response.json() as LocalDbSeed
+
+    // Pause sync hooks to avoid re-entrant writes during the reload
+    _isLoading = true
+    try {
+      await db.transaction('rw', [
+        db.exercises, db.templates, db.sessions, db.personalRecords,
+        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs
+      ], async () => {
+        await Promise.all([
+          db.exercises.clear(), db.templates.clear(), db.sessions.clear(),
+          db.personalRecords.clear(), db.settings.clear(), db.users.clear(),
+          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear()
+        ])
+        if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
+        if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
+        if (seed.sessions?.length) await db.sessions.bulkPut(seed.sessions)
+        if (seed.personalRecords?.length) await db.personalRecords.bulkPut(seed.personalRecords)
+        if (seed.users?.length) await db.users.bulkPut(seed.users)
+        if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
+        if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
+        if (seed.docs?.length) await db.docs.bulkPut(seed.docs)
+        if (seed.settings) {
+          const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
+          if (rows.length) await db.settings.bulkPut(rows)
+        }
+      })
+    } finally {
+      _isLoading = false
+    }
+  } catch {
+    // API server not available — fall back to static seed file (first-run only)
+    await _bootstrapFromStaticSeed()
+  }
+}
+
+// Fallback: full clear-and-reload from the static public file.
+// Used when the API server is unreachable (e.g. PWA / offline).
+// Always overwrites so a phone with stale IndexedDB data gets updated too.
+async function _bootstrapFromStaticSeed(): Promise<void> {
+  try {
+    const response = await fetch('/local-db.json', { cache: 'no-store' })
     if (!response.ok) return
     const seed = await response.json() as LocalDbSeed
 
-    if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
-    if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
-    if (seed.sessions?.length) await db.sessions.bulkPut(seed.sessions)
-    if (seed.personalRecords?.length) await db.personalRecords.bulkPut(seed.personalRecords)
-    if (seed.users?.length) await db.users.bulkPut(seed.users)
-    if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
-    if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
-    if (seed.settings) {
-      const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
-      if (rows.length) await db.settings.bulkPut(rows)
+    _isLoading = true
+    try {
+      await db.transaction('rw', [
+        db.exercises, db.templates, db.sessions, db.personalRecords,
+        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs
+      ], async () => {
+        await Promise.all([
+          db.exercises.clear(), db.templates.clear(), db.sessions.clear(),
+          db.personalRecords.clear(), db.settings.clear(), db.users.clear(),
+          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear()
+        ])
+        if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
+        if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
+        if (seed.sessions?.length) await db.sessions.bulkPut(seed.sessions)
+        if (seed.personalRecords?.length) await db.personalRecords.bulkPut(seed.personalRecords)
+        if (seed.users?.length) await db.users.bulkPut(seed.users)
+        if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
+        if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
+        if (seed.docs?.length) await db.docs.bulkPut(seed.docs)
+        if (seed.settings) {
+          const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
+          if (rows.length) await db.settings.bulkPut(rows)
+        }
+      })
+    } finally {
+      _isLoading = false
     }
-  } catch {
-    // Ignore seed failures and continue with an empty DB.
-  }
+  } catch { /* ignore */ }
+}
+
+// ---------------------------------------------------------------------------
+// syncToFile — dumps all Dexie tables and POSTs to /api/db (local file).
+// Called automatically via debounced hooks after every write.
+// ---------------------------------------------------------------------------
+export async function syncToFile(): Promise<void> {
+  try {
+    const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows, docs] = await Promise.all([
+      db.exercises.toArray(), db.templates.toArray(), db.sessions.toArray(),
+      db.personalRecords.toArray(), db.users.toArray(), db.linkedAuthAccounts.toArray(),
+      db.userSettings.toArray(), db.settings.toArray(), db.docs.toArray()
+    ])
+
+    const settings = Object.fromEntries(settingsRows.map(r => [r.key, r.value]))
+    const payload: LocalDbSeed = {
+      meta: { name: 'NotHevyDB', version: 3 },
+      exercises, templates, sessions, personalRecords,
+      users, linkedAuthAccounts, userSettings, settings, docs
+    }
+
+    await fetch('/api/db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload, null, 2)
+    })
+  } catch { /* ignore if API server unavailable */ }
 }

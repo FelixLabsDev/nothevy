@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useSettingsStore } from '@/stores/settingsStore'
-import { bootstrapDbFromLocalFile } from '@/db'
+import { loadFromFile, scheduleSyncToFile, syncToFile, _isLoading, db } from '@/db'
 import BottomNav from '@/components/BottomNav'
 import Dashboard from '@/pages/Dashboard'
 import Exercises from '@/pages/Exercises'
@@ -14,14 +15,38 @@ import Settings from '@/pages/Settings'
 import Docs from '@/pages/Docs'
 import DocEditor from '@/pages/DocEditor'
 
+// ---------------------------------------------------------------------------
+// SyncWatcher — uses useLiveQuery (reliable Dexie 4 change detection) to
+// schedule a file sync whenever any table is mutated.
+// Watches full arrays for tables that support in-place edits (exercises,
+// templates, docs) and counts for append-only tables (sessions, PRs).
+// ---------------------------------------------------------------------------
+function SyncWatcher() {
+  const exercises = useLiveQuery(() => db.exercises.toArray(), [])
+  const templates = useLiveQuery(() => db.templates.toArray(), [])
+  const docs      = useLiveQuery(() => db.docs.toArray(), [])
+  const sessionCount = useLiveQuery(() => db.sessions.count(), [])
+  const prCount      = useLiveQuery(() => db.personalRecords.count(), [])
+
+  useEffect(() => {
+    if (!_isLoading) scheduleSyncToFile()
+  }, [exercises, templates, docs, sessionCount, prCount])
+
+  return null
+}
+
 export default function App() {
   const { load } = useSettingsStore()
 
-  // Seed DB from committed local file on first run, then hydrate settings.
-  useEffect(() => { void bootstrapDbFromLocalFile().then(load) }, [load])
+  // Load DB from local file on every startup, then hydrate settings.
+  useEffect(() => { void loadFromFile().then(load) }, [load])
+
+  // Expose syncToFile on window for emergency console access (dev only)
+  useEffect(() => { (window as Record<string, unknown>).syncToFile = syncToFile }, [])
 
   return (
     <div className="max-w-lg mx-auto min-h-screen relative">
+      <SyncWatcher />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/exercises" element={<Exercises />} />
