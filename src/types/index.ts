@@ -48,12 +48,14 @@ export interface UserSettingRow {
 }
 
 // ---------------------------------------------------------------------------
-// ExerciseMedia — images and videos attached to an exercise, stored as Blobs
+// ExerciseMedia — images and videos attached to an exercise, saved as files on
+// disk (public/media/) and referenced by a local URL (e.g. /media/uuid.jpg).
+// Nothing is stored in browser memory — all media lives on the local file system.
 // ---------------------------------------------------------------------------
 export interface ExerciseMedia {
   id: string
   type: 'image' | 'video'
-  blob: Blob
+  url: string       // local file URL served by Vite from public/media/
   mimeType: string
   name: string
   addedAt: number

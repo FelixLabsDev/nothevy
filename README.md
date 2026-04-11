@@ -28,7 +28,13 @@ bun install
 bun run dev
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:5058`.
+
+Alternatively:
+
+```bash
+bun run start
+```
 
 ### Build for Production
 
@@ -66,6 +72,13 @@ Go to **Settings → AI Provider** and set provider, model, and API key. Keys ar
 
 | Version | Notes |
 |---|---|
+| 0.6.0 | Store exercise media as files on disk (`public/media/`) via API server — nothing stored in browser memory; stale blob entries auto-purged on load |
+| 0.5.7 | Prevent Exercise editor crash when legacy media entries contain non-Blob payloads; show safe fallback instead of blank screen |
+| 0.5.6 | Make New Exercise sheet reach the bottom edge while staying layered above bottom navigation |
+| 0.5.5 | Keep Exercise form sheet scroll and action buttons above the fixed bottom navigation bar |
+| 0.5.4 | Update `start` script to run Vite with `CHOKIDAR_USEPOLLING=true` on `5058` to avoid Linux `ENOSPC` watcher crashes |
+| 0.5.3 | Add `start` script that runs local API + Vite on port `5058` |
+| 0.5.2 | Set Vite preview default port to `5058` and align startup docs to `http://localhost:5058` |
 | 0.5.1 | Static-seed fallback now does a full clear-and-reload so stale IndexedDB on other devices is always overwritten |
 | 0.5.0 | Local file-backed DB — `api-server.js` syncs `public/local-db.json` bidirectionally on every read/write |
 | 0.4.0 | Add Export DB Seed button to Settings; remove dead claude.ts |

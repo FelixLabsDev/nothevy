@@ -12,6 +12,7 @@ import ActiveSession from '@/pages/ActiveSession'
 import SessionRecap from '@/pages/SessionRecap'
 import History from '@/pages/History'
 import Settings from '@/pages/Settings'
+import SettingsDefaults from '@/pages/SettingsDefaults'
 import Docs from '@/pages/Docs'
 import DocEditor from '@/pages/DocEditor'
 
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/session/:id" element={<SessionRecap />} />
         <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/defaults" element={<SettingsDefaults />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/docs/:id" element={<DocEditor />} />
         <Route path="*" element={<Navigate to="/" replace />} />

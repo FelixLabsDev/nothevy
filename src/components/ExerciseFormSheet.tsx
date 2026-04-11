@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Plus, X, ImagePlus, Play, ZoomIn, Link, Upload, Loader2, RotateCcw } from 'lucide-react'
 import { nanoid } from '@/lib/workout'
@@ -56,30 +56,16 @@ function MediaGrid({
   onRemove: (id: string) => void
   onPreview: (item: ExerciseMedia) => void
 }) {
-  const urlMap = useRef<Map<string, string>>(new Map())
-
-  const getUrl = (item: ExerciseMedia): string => {
-    if (!urlMap.current.has(item.id)) {
-      urlMap.current.set(item.id, URL.createObjectURL(item.blob))
-    }
-    return urlMap.current.get(item.id)!
-  }
-
-  useEffect(() => {
-    return () => { urlMap.current.forEach(u => URL.revokeObjectURL(u)) }
-  }, [])
-
   if (!items.length) return null
 
   return (
     <div className="grid grid-cols-3 gap-2 mt-3">
       {items.map(item => (
         <div key={item.id} className="relative group rounded-xl overflow-hidden bg-slate-800 aspect-square">
-          {item.type === 'image' ? (
-            <img src={getUrl(item)} alt={item.name} className="w-full h-full object-cover" />
-          ) : (
-            <video src={getUrl(item)} className="w-full h-full object-cover" muted playsInline />
-          )}
+          {item.type === 'image'
+            ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+            : <video src={item.url} className="w-full h-full object-cover" muted playsInline />
+          }
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
             <button className="p-1.5 rounded-lg bg-slate-900/80 text-white" onClick={() => onPreview(item)}>
               {item.type === 'video' ? <Play size={14} /> : <ZoomIn size={14} />}
@@ -103,19 +89,16 @@ function MediaGrid({
 // Lightbox
 // ---------------------------------------------------------------------------
 function Lightbox({ item, onClose }: { item: ExerciseMedia; onClose: () => void }) {
-  const url = useRef(URL.createObjectURL(item.blob))
-  useEffect(() => () => URL.revokeObjectURL(url.current), [])
-
   return (
     <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4" onClick={onClose}>
       <button className="absolute top-4 right-4 p-2 rounded-xl bg-slate-800 text-white" onClick={onClose}>
         <X size={20} />
       </button>
       {item.type === 'image' ? (
-        <img src={url.current} alt={item.name} className="max-w-full max-h-full rounded-xl object-contain" />
+        <img src={item.url} alt={item.name} className="max-w-full max-h-full rounded-xl object-contain" />
       ) : (
         <video
-          src={url.current}
+          src={item.url}
           controls
           autoPlay
           className="max-w-full max-h-full rounded-xl"
@@ -272,21 +255,44 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
       return [...rows, next]
     })
 
-  const handleFiles = (files: FileList | null) => {
+  // Upload a file (Blob) to the local API server and return its served URL
+  const uploadToServer = async (blob: Blob, name: string): Promise<string> => {
+    const res = await fetch(`/api/media?name=${encodeURIComponent(name)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': blob.type || 'application/octet-stream' },
+      body: blob
+    })
+    if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
+    const { url } = await res.json()
+    return url as string
+  }
+
+  const handleFiles = async (files: FileList | null) => {
     if (!files) return
-    const newMedia: ExerciseMedia[] = Array.from(files).map(file => ({
-      id: nanoid(),
-      type: file.type.startsWith('video/') ? 'video' : 'image',
-      blob: file,
-      mimeType: file.type,
-      name: file.name,
-      addedAt: Date.now()
-    }))
+    const newMedia: ExerciseMedia[] = (await Promise.all(
+      Array.from(files).map(async file => {
+        try {
+          const url = await uploadToServer(file, file.name)
+          return {
+            id: nanoid(),
+            type: (file.type.startsWith('video/') ? 'video' : 'image') as 'image' | 'video',
+            url, mimeType: file.type, name: file.name, addedAt: Date.now()
+          }
+        } catch { return null }
+      })
+    )).filter(Boolean) as ExerciseMedia[]
     setForm(f => ({ ...f, media: [...f.media, ...newMedia] }))
   }
 
-  const removeMedia = (id: string) =>
+  const removeMedia = async (id: string) => {
+    const item = form.media.find(m => m.id === id)
+    // Delete the file from disk; fire-and-forget
+    if (item?.url?.startsWith('/media/')) {
+      const filename = item.url.slice('/media/'.length)
+      fetch(`/api/media/${filename}`, { method: 'DELETE' }).catch(() => {})
+    }
     setForm(f => ({ ...f, media: f.media.filter(m => m.id !== id) }))
+  }
 
   const fetchFromUrl = async () => {
     const url = urlInput.trim()
@@ -300,7 +306,8 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
       const mimeType = blob.type || (url.match(/\.(mp4|webm|mov|avi)$/i) ? 'video/mp4' : 'image/jpeg')
       const type: 'image' | 'video' = mimeType.startsWith('video/') ? 'video' : 'image'
       const name = url.split('/').pop()?.split('?')[0] || 'media'
-      const item: ExerciseMedia = { id: nanoid(), type, blob, mimeType, name, addedAt: Date.now() }
+      const savedUrl = await uploadToServer(blob, name)
+      const item: ExerciseMedia = { id: nanoid(), type, url: savedUrl, mimeType, name, addedAt: Date.now() }
       setForm(f => ({ ...f, media: [...f.media, item] }))
       setUrlInput('')
       setMediaPicker(null)
@@ -313,7 +320,7 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm">
         <div className="bg-slate-900 rounded-t-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 pb-safe">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">{initialExercise ? 'Edit' : 'New'} Exercise</h2>

@@ -129,7 +129,9 @@ type LocalDbSeed = {
 }
 
 function normalizeExerciseMedia(exercise: Omit<Exercise, 'media'> & { media?: Exercise['media'] }): Exercise {
-  return { ...exercise, media: exercise.media ?? [] }
+  // Filter out any stale legacy entries that have no url (old blob-only rows from before disk storage)
+  const media = (exercise.media ?? []).filter(m => m.url && typeof m.url === 'string')
+  return { ...exercise, media }
 }
 
 // ---------------------------------------------------------------------------

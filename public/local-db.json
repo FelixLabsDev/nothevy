@@ -16,21 +16,21 @@
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "rtt8Tlk60WVJOjtFcWWxi",
+          "id": "-z11ZnJiCGk-UG9O0-6h9",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "QeYcJoxuc73yVeL1lP-ae",
+          "id": "b3l5edNpR5zxHhLJznbU7",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "cgw0i9cVncIEyZDI5ESq-",
+          "id": "VHPhmJ2p0mrOIOb7C2yos",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
@@ -82,100 +82,6 @@
       "variations": [],
       "id": "BWLnDpmKI3F0Yoy6mYhub",
       "createdAt": 1775643411249
-    },
-    {
-      "name": "Chest press",
-      "muscleGroups": [
-        "chest"
-      ],
-      "equipment": [
-        "barbell",
-        "dumbbell",
-        "machine"
-      ],
-      "defaultSetType": "reps",
-      "defaultRestSeconds": 120,
-      "defaultSets": [
-        {
-          "id": "LSXt15lqeahMuRAsvGaRS",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        },
-        {
-          "id": "8b-wEY3xTRXnL0XcBCARs",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        },
-        {
-          "id": "C9DlU1ALehNXdu4oX6WAx",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        }
-      ],
-      "media": [],
-      "instructions": "",
-      "tags": [],
-      "variations": [
-        "Incline",
-        "Flat",
-        "Dumbbell",
-        "Barbell"
-      ],
-      "id": "CGW9PWdlJ5BMAfaICfsU1",
-      "createdAt": 1775585306440
-    },
-    {
-      "name": "Pull up",
-      "muscleGroups": [
-        "back"
-      ],
-      "equipment": [
-        "pull_up_bar"
-      ],
-      "defaultSetType": "reps",
-      "defaultRestSeconds": 120,
-      "defaultSets": [
-        {
-          "id": "DfaYDJpvSKk0rtWppakwJ",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        },
-        {
-          "id": "DjDRwmZ1j3y6-sznTTpDL",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        },
-        {
-          "id": "nqLH7ZazFA3Rg9VnEUAN8",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        },
-        {
-          "id": "Ei_KoEXLfqVQtT3l0OH9g",
-          "type": "reps",
-          "reps": 10,
-          "weightUnit": "kg",
-          "restSeconds": 120
-        }
-      ],
-      "media": [],
-      "instructions": "",
-      "tags": [],
-      "id": "GTIi2hc9e0_HME1JsRJI5",
-      "createdAt": 1775421423220,
-      "ownerUserId": "local-default"
     },
     {
       "name": "Shoulder dumbbell press",

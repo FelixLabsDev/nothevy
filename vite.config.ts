@@ -37,5 +37,9 @@ export default defineConfig({
     allowedHosts: ['nothevy.felixlabs.net'],
     // Proxy /api/* to the local Express DB server
     proxy: { '/api': 'http://localhost:3001' }
+  },
+  preview: {
+    port: 5058,
+    strictPort: true
   }
 })
