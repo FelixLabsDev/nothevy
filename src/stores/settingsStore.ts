@@ -25,6 +25,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       defaultRestSeconds: 120,
       defaultSetRowCount: 3,
       theme: 'dark',
+      exerciseImagePreview: true,
       aiProvider: 'claude',
       muscleGroups: DEFAULT_MUSCLE_GROUPS,
       equipment: DEFAULT_EQUIPMENT

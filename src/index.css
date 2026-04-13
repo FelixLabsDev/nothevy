@@ -4,15 +4,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---- Theme variables (light = default, dark = opt-in via html.dark) ---- */
+:root {
+  --bg-base:  #f8fafc;   /* slate-50  */
+  --bg-card:  #ffffff;
+  --bg-el:    #f1f5f9;   /* slate-100 */
+  --bg-hover: #e2e8f0;   /* slate-200 */
+  --border:   #e2e8f0;   /* slate-200 */
+  --text-hi:  #0f172a;   /* slate-900 */
+  --text-lo:  #475569;   /* slate-600 */
+  --text-dim: #94a3b8;   /* slate-400 */
+  --bg-nav:   rgba(248, 250, 252, 0.95);
+}
+
+html.dark {
+  --bg-base:  #020617;   /* slate-950 */
+  --bg-card:  #0f172a;   /* slate-900 */
+  --bg-el:    #1e293b;   /* slate-800 */
+  --bg-hover: #334155;   /* slate-700 */
+  --border:   #1e293b;   /* slate-800 */
+  --text-hi:  #f1f5f9;   /* slate-100 */
+  --text-lo:  #94a3b8;   /* slate-400 */
+  --text-dim: #64748b;   /* slate-500 */
+  --bg-nav:   rgba(2, 6, 23, 0.95);
+}
+
 @layer base {
-  html { @apply bg-slate-950 text-slate-100 antialiased; }
+  html { background-color: var(--bg-base); color: var(--text-hi); @apply antialiased; }
   body { @apply min-h-screen; }
-  * { @apply border-slate-800; }
+  * { border-color: var(--border); }
 }
 
 @layer components {
   /* Reusable card surface */
-  .card { @apply bg-slate-900 rounded-2xl border border-slate-800 p-4; }
+  .card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    @apply rounded-2xl p-4;
+  }
 
   /* Primary action button */
   .btn-primary {
@@ -23,10 +52,12 @@
 
   /* Ghost / secondary button */
   .btn-ghost {
+    background-color: var(--bg-el);
+    color: var(--text-hi);
     @apply inline-flex items-center justify-center gap-2 rounded-xl
-           bg-slate-800 text-slate-100 font-medium px-4 py-2.5
-           transition hover:bg-slate-700 active:scale-95 disabled:opacity-50;
+           font-medium px-4 py-2.5 transition active:scale-95 disabled:opacity-50;
   }
+  .btn-ghost:hover { background-color: var(--bg-hover); }
 
   /* Danger button */
   .btn-danger {
@@ -37,23 +68,28 @@
 
   /* Form input */
   .input {
-    @apply w-full rounded-xl bg-slate-800 border border-slate-700
-           px-4 py-2.5 text-slate-100 placeholder:text-slate-500
+    background-color: var(--bg-el);
+    border-color: var(--border);
+    color: var(--text-hi);
+    @apply w-full rounded-xl border px-4 py-2.5
+           placeholder:text-slate-400
            focus:outline-none focus:ring-2 focus:ring-brand-500 transition;
   }
 
   /* Muscle / tag chip */
   .chip {
-    @apply inline-flex items-center rounded-full bg-slate-800
-           px-3 py-1 text-xs font-medium text-slate-300;
+    background-color: var(--bg-el);
+    color: var(--text-lo);
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
   }
 
   /* Bottom nav tab */
   .nav-tab {
-    @apply flex flex-col items-center gap-0.5 text-slate-500
-           transition hover:text-slate-100 py-2 px-3;
+    color: var(--text-dim);
+    @apply flex flex-col items-center gap-0.5 transition py-2 px-3;
   }
-  .nav-tab.active { @apply text-brand-400; }
+  .nav-tab:hover { color: var(--text-hi); }
+  .nav-tab.active { color: #22c55e; } /* brand-500 */
 }
 
 /* Safe-area bottom padding for iPhones */

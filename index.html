@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark"><!-- class updated at runtime; dark is the default -->
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -8,6 +8,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>NotHevy</title>
+    <!-- Prevent flash of wrong theme before React loads -->
+    <script>
+      (function(){var t=localStorage.getItem('notHevy_theme');if(t==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark')})()
+    </script>
   </head>
   <body>
     <div id="root"></div>

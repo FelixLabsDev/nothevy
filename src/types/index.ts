@@ -180,6 +180,7 @@ export interface AppSettings {
   defaultRestSeconds: number
   defaultSetRowCount: number
   theme: 'dark' | 'light' | 'system'
+  exerciseImagePreview: boolean
   aiProvider: AIProvider
   aiApiKey?: string
   aiModel?: string   // empty = use provider default

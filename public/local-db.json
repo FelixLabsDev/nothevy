@@ -84,6 +84,48 @@
       "createdAt": 1775643411249
     },
     {
+      "name": "Couch Stretch",
+      "muscleGroups": [
+        "legs"
+      ],
+      "equipment": [],
+      "defaultSetType": "timed",
+      "defaultRestSeconds": 0,
+      "defaultSets": [
+        {
+          "id": "9BRZNyZFk0xGAi9kLxJ5g",
+          "type": "timed",
+          "reps": 8,
+          "durationSeconds": 60,
+          "weightUnit": "kg",
+          "restSeconds": 0
+        },
+        {
+          "id": "D7NXQ_5prXhIDS2q8zKZb",
+          "type": "timed",
+          "reps": 8,
+          "durationSeconds": 60,
+          "weightUnit": "kg",
+          "restSeconds": 0
+        }
+      ],
+      "media": [
+        {
+          "id": "mY4uzw7TeIZpenihAtr2K",
+          "type": "image",
+          "url": "/media/c03e68ca-1a04-4823-8f54-c3f0f6380f84.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776115617196
+        }
+      ],
+      "instructions": "",
+      "tags": [],
+      "variations": [],
+      "id": "dfu0kN7yYYUtvfwIAEGNm",
+      "createdAt": 1776115586136
+    },
+    {
       "name": "Shoulder dumbbell press",
       "muscleGroups": [
         "shoulders"

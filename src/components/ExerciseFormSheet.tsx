@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus, X, ImagePlus, Play, ZoomIn, Link, Upload, Loader2, RotateCcw } from 'lucide-react'
+import { Plus, X, ImagePlus, Play, ZoomIn, Link, Upload, Loader2, RotateCcw, Clipboard } from 'lucide-react'
 import { nanoid } from '@/lib/workout'
 import { db } from '@/db'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -284,6 +284,38 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
     setForm(f => ({ ...f, media: [...f.media, ...newMedia] }))
   }
 
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const imageFiles = Array.from(e.clipboardData.items)
+      .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
+      .map(item => item.getAsFile())
+      .filter((f): f is File => f !== null)
+    if (imageFiles.length === 0) return
+    e.preventDefault()
+    const dt = new DataTransfer()
+    imageFiles.forEach(f => dt.items.add(f))
+    await handleFiles(dt.files)
+  }
+
+  const pasteFromClipboard = async () => {
+    setMediaPicker(null)
+    try {
+      const items = await navigator.clipboard.read()
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith('image/'))
+        if (imageType) {
+          const blob = await item.getType(imageType)
+          const ext = imageType.split('/')[1] ?? 'png'
+          const file = new File([blob], `paste.${ext}`, { type: imageType })
+          const dt = new DataTransfer()
+          dt.items.add(file)
+          await handleFiles(dt.files)
+        }
+      }
+    } catch {
+      // Permission denied or no image in clipboard — silently ignore
+    }
+  }
+
   const removeMedia = async (id: string) => {
     const item = form.media.find(m => m.id === id)
     // Delete the file from disk; fire-and-forget
@@ -321,7 +353,7 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
   return (
     <>
       <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm">
-        <div className="bg-slate-900 rounded-t-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 pb-safe">
+        <div className="bg-slate-900 rounded-t-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 pb-safe" onPaste={handlePaste}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">{initialExercise ? 'Edit' : 'New'} Exercise</h2>
             <div className="flex items-center gap-2">
@@ -541,6 +573,17 @@ export default function ExerciseFormSheet({ initialExercise, onClose, onSaved }:
                     <div>
                       <p className="font-medium">Upload from device</p>
                       <p className="text-xs text-slate-500">Select files from your photos or storage</p>
+                    </div>
+                  </button>
+                  <div className="h-px bg-slate-800" />
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition text-left"
+                    onClick={pasteFromClipboard}
+                  >
+                    <Clipboard size={16} className="text-brand-400 shrink-0" />
+                    <div>
+                      <p className="font-medium">Paste from clipboard</p>
+                      <p className="text-xs text-slate-500">Use an image copied to your clipboard</p>
                     </div>
                   </button>
                   <div className="h-px bg-slate-800" />

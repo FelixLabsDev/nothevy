@@ -13,7 +13,8 @@ const tabs = [
 export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg
-                    bg-slate-950/95 backdrop-blur border-t border-slate-800 pb-safe z-50">
+                    backdrop-blur border-t pb-safe z-50"
+         style={{ backgroundColor: 'var(--bg-nav)', borderColor: 'var(--border)' }}>
       <div className="flex justify-around">
         {tabs.map(({ to, label, Icon }) => (
           <NavLink

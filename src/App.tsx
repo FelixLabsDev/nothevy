@@ -37,10 +37,27 @@ function SyncWatcher() {
 }
 
 export default function App() {
-  const { load } = useSettingsStore()
+  const { load, settings } = useSettingsStore()
 
   // Load DB from local file on every startup, then hydrate settings.
   useEffect(() => { void loadFromFile().then(load) }, [load])
+
+  // Apply theme to <html> whenever it changes
+  useEffect(() => {
+    const apply = (dark: boolean) => {
+      document.documentElement.classList.toggle('dark', dark)
+      localStorage.setItem('notHevy_theme', dark ? 'dark' : 'light')
+    }
+    const theme = settings.theme ?? 'dark'
+    if (theme === 'dark') { apply(true); return }
+    if (theme === 'light') { apply(false); return }
+    // system
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    apply(mq.matches)
+    const handler = (e: MediaQueryListEvent) => apply(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [settings.theme])
 
   // Expose syncToFile on window for emergency console access (dev only)
   useEffect(() => { (window as Record<string, unknown>).syncToFile = syncToFile }, [])

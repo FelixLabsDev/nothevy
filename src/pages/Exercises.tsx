@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Plus, Search, X } from 'lucide-react'
 import { db } from '@/db'
+import { useSettingsStore } from '@/stores/settingsStore'
 import PageHeader from '@/components/PageHeader'
 import ExerciseFormSheet from '@/components/ExerciseFormSheet'
 import type { Exercise } from '@/types'
@@ -45,6 +46,8 @@ export default function Exercises() {
   const [sort, setSort] = useState<SortMode>('muscle')
   const [showForm, setShowForm] = useState(false)
   const [editExercise, setEditExercise] = useState<Exercise | undefined>(undefined)
+  const { settings } = useSettingsStore()
+  const imagePreview = settings.exerciseImagePreview !== false
 
   const exercises = useLiveQuery(() => db.exercises.orderBy('name').toArray(), [])
 
@@ -68,34 +71,45 @@ export default function Exercises() {
     { id: 'alpha',  label: 'A–Z' },
   ]
 
-  const ExerciseCard = ({ e }: { e: Exercise }) => (
-    <div className="card flex items-center gap-3 cursor-pointer" onClick={() => openEdit(e)}>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium">{e.name}</p>
-        <div className="flex flex-wrap gap-1 mt-1">
-          {e.muscleGroups.map(m => <span key={m} className="chip">{m.replace(/_/g, ' ')}</span>)}
+  const ExerciseCard = ({ e }: { e: Exercise }) => {
+    const firstImage = e.media?.find(m => m.type === 'image')
+    return (
+      <div className="card relative overflow-hidden flex items-center gap-3 cursor-pointer" onClick={() => openEdit(e)}>
+        {imagePreview && firstImage && (
+          <img
+            src={firstImage.url}
+            alt=""
+            className="absolute top-0 right-[5%] h-full w-1/2 object-cover"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%)',
+            }}
+          />
+        )}
+        <div className="relative flex-1 min-w-0">
+          <p className="font-medium">{e.name}</p>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {e.muscleGroups.map(m => <span key={m} className="chip">{m.replace(/_/g, ' ')}</span>)}
+          </div>
+          <div className="flex items-center gap-3 mt-1">
+            {e.defaultSets?.length > 0 && (
+              <p className="text-xs text-slate-500">
+                {e.defaultSets.length} set{e.defaultSets.length !== 1 ? 's' : ''} · {
+                  e.defaultSets[0].restSeconds === 0 ? 'no rest' : `${e.defaultSets[0].restSeconds}s rest`
+                }
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-3 mt-1">
-          {e.defaultSets?.length > 0 && (
-            <p className="text-xs text-slate-500">
-              {e.defaultSets.length} set{e.defaultSets.length !== 1 ? 's' : ''} · {
-                e.defaultSets[0].restSeconds === 0 ? 'no rest' : `${e.defaultSets[0].restSeconds}s rest`
-              }
-            </p>
-          )}
-          {e.media?.length > 0 && (
-            <p className="text-xs text-slate-500">{e.media.length} media</p>
-          )}
-        </div>
+        <button
+          className="relative p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-red-400 transition shrink-0"
+          onClick={ev => { ev.stopPropagation(); remove(e.id) }}
+        >
+          <X size={16} />
+        </button>
       </div>
-      <button
-        className="p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-red-400 transition shrink-0"
-        onClick={ev => { ev.stopPropagation(); remove(e.id) }}
-      >
-        <X size={16} />
-      </button>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="px-4 pb-nav mb-nav">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Moon, Dumbbell, Eye, EyeOff, Bot, Download, X, Plus, RotateCcw, ChevronRight } from 'lucide-react'
+import { Moon, Dumbbell, Eye, EyeOff, Bot, Download, X, Plus, RotateCcw, ChevronRight, Palette, Image } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { db } from '@/db'
@@ -118,26 +118,57 @@ export default function Settings() {
           <ChevronRight size={16} className="text-slate-500" />
         </button>
 
-        {/* Theme */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <Moon size={18} className="text-brand-400" />
-            <span className="font-semibold">Theme</span>
+        {/* Visual */}
+        <div className="card space-y-4">
+          <div className="flex items-center gap-3">
+            <Palette size={18} className="text-brand-400" />
+            <span className="font-semibold">Visual</span>
           </div>
-          <div className="flex gap-3">
-            {(['dark', 'light', 'system'] as const).map(t => (
-              <button
-                key={t}
-                className={`flex-1 py-2.5 rounded-xl font-medium text-sm capitalize transition ${
-                  settings.theme === t
-                    ? 'bg-brand-500 text-slate-950'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                }`}
-                onClick={() => update('theme', t)}
-              >
-                {t}
-              </button>
-            ))}
+
+          {/* Theme */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Moon size={14} className="text-[var(--text-dim)]" />
+              <span className="text-sm text-[var(--text-lo)]">Theme</span>
+            </div>
+            <div className="flex gap-3">
+              {(['dark', 'light', 'system'] as const).map(t => (
+                <button
+                  key={t}
+                  className={`flex-1 py-2.5 rounded-xl font-medium text-sm capitalize transition ${
+                    settings.theme === t
+                      ? 'bg-brand-500 text-slate-950'
+                      : 'bg-[var(--bg-el)] text-[var(--text-lo)] hover:bg-[var(--bg-hover)]'
+                  }`}
+                  onClick={() => {
+                    update('theme', t)
+                    const isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                    document.documentElement.classList.toggle('dark', isDark)
+                    localStorage.setItem('notHevy_theme', isDark ? 'dark' : 'light')
+                  }}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Exercise image preview */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Image size={14} className="text-[var(--text-dim)]" />
+              <span className="text-sm text-[var(--text-lo)]">Exercise image preview</span>
+            </div>
+            <button
+              className={`relative w-11 h-6 rounded-full transition-colors ${
+                settings.exerciseImagePreview !== false ? 'bg-brand-500' : 'bg-[var(--bg-el)]'
+              }`}
+              onClick={() => update('exerciseImagePreview', settings.exerciseImagePreview === false ? true : false)}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                settings.exerciseImagePreview !== false ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
           </div>
         </div>
 
