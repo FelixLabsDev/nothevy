@@ -46,42 +46,157 @@
       "variations": []
     },
     {
-      "name": "Squat",
+      "name": "Deep Squat hold",
+      "muscleGroups": [
+        "legs"
+      ],
+      "equipment": [],
+      "defaultSetType": "timed",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "9aagwX2Uf03twYJnNuihi",
+          "type": "timed",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120,
+          "durationSeconds": 120
+        },
+        {
+          "id": "sZ7JyW5fzQ8jQWgeOt7aq",
+          "type": "timed",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120,
+          "durationSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "4tueAEKKUQcUKdg2yOkfO",
+          "type": "image",
+          "url": "/media/924843df-020d-4eda-a199-9a996baa0139.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265783444
+        }
+      ],
+      "instructions": "https://videos.files.wordpress.com/vESQW0MV/squat-hold.mp4",
+      "tags": [],
+      "variations": [],
+      "id": "BWLnDpmKI3F0Yoy6mYhub",
+      "createdAt": 1775643411249
+    },
+    {
+      "name": "Outer hip circuit",
       "muscleGroups": [
         "legs"
       ],
       "equipment": [],
       "defaultSetType": "reps",
-      "defaultRestSeconds": 120,
+      "defaultRestSeconds": 0,
       "defaultSets": [
         {
-          "id": "bs2V4CyRs2LhF1sPAZtGV",
+          "id": "Iu5ZGWbkYwLsnR1OudlGM",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
-          "restSeconds": 120
+          "restSeconds": 0
         },
         {
-          "id": "X16xM0l4DfppV6NhxVuxt",
+          "id": "eI2f2hp1Dmh18jgiGBxWQ",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
-          "restSeconds": 120
+          "restSeconds": 0
         },
         {
-          "id": "KidOnKlWUBkda_XFcTSy_",
+          "id": "M6VkDF4wNObm80vmwDmeA",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
-          "restSeconds": 120
+          "restSeconds": 0
+        },
+        {
+          "id": "v6CeBdsifW7G4BiRqc0QZ",
+          "type": "timed",
+          "reps": 10,
+          "durationSeconds": 30,
+          "weightUnit": "kg",
+          "restSeconds": 0
+        },
+        {
+          "id": "eSPnwrKbmvKVbo7fPcgrY",
+          "type": "timed",
+          "reps": 10,
+          "durationSeconds": 30,
+          "weightUnit": "kg",
+          "restSeconds": 0
+        },
+        {
+          "id": "0X7ms4vKxUgcy6udYmp2G",
+          "type": "timed",
+          "reps": 10,
+          "durationSeconds": 30,
+          "weightUnit": "kg",
+          "restSeconds": 0
         }
       ],
-      "media": [],
-      "instructions": "",
+      "media": [
+        {
+          "id": "OKyGK36vAk48z1fGn5nKc",
+          "type": "image",
+          "url": "/media/4bed0e35-d7c2-4fb8-b30a-ba8ad937ad42.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265216695
+        },
+        {
+          "id": "8knWp0Qhl_UJPJArJp2RP",
+          "type": "image",
+          "url": "/media/6d519883-c43a-4583-a9d5-94531e038200.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265248133
+        },
+        {
+          "id": "o4jE2gRNkD4W1eeyMCaHj",
+          "type": "image",
+          "url": "/media/97f7fd0e-a114-48e5-a8c0-d91afaa67eb9.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265255379
+        },
+        {
+          "id": "HnJEfNYme7KrXl_Gnf7-7",
+          "type": "image",
+          "url": "/media/515dc9b3-cf50-4549-9a60-9dd9ce088c57.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265263685
+        },
+        {
+          "id": "RRoPgdhiC_d8-D7wZ-kpf",
+          "type": "image",
+          "url": "/media/d6f2703c-2b7f-48ec-83d7-87907717c6e4.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265269341
+        },
+        {
+          "id": "b3IFZAJviCB6d4AyyJK5-",
+          "type": "image",
+          "url": "/media/286206b6-60c7-4705-a1cd-89559e2bea2d.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776265272551
+        }
+      ],
+      "instructions": "Do this on both sides, one then the other\n\nhttps://videos.files.wordpress.com/JXAMa9NP/outer-hip-circuit-_-lowbackability.com_.mp4",
       "tags": [],
       "variations": [],
-      "id": "BWLnDpmKI3F0Yoy6mYhub",
-      "createdAt": 1775643411249
+      "id": "ECCy5ntqFUO3D22s7QttI",
+      "createdAt": 1776265296390
     },
     {
       "name": "Couch Stretch",
@@ -93,7 +208,7 @@
       "defaultRestSeconds": 0,
       "defaultSets": [
         {
-          "id": "9BRZNyZFk0xGAi9kLxJ5g",
+          "id": "t0vBMGBJu4bJYw0xjBHqs",
           "type": "timed",
           "reps": 8,
           "durationSeconds": 60,
@@ -101,7 +216,7 @@
           "restSeconds": 0
         },
         {
-          "id": "D7NXQ_5prXhIDS2q8zKZb",
+          "id": "jAk9jO7BZQM7qlpkTpEjP",
           "type": "timed",
           "reps": 8,
           "durationSeconds": 60,
@@ -119,11 +234,133 @@
           "addedAt": 1776115617196
         }
       ],
-      "instructions": "",
+      "instructions": "https://videos.files.wordpress.com/NyGKSaq1/couch-stretch-_-lowbackability.com_.mp4",
       "tags": [],
       "variations": [],
       "id": "dfu0kN7yYYUtvfwIAEGNm",
       "createdAt": 1776115586136
+    },
+    {
+      "name": "Dead & Active Hang",
+      "muscleGroups": [],
+      "equipment": [],
+      "defaultSetType": "timed",
+      "defaultRestSeconds": 0,
+      "defaultSets": [
+        {
+          "id": "KbHr85b0fpqnwR6IhPYSp",
+          "type": "timed",
+          "reps": 8,
+          "durationSeconds": 60,
+          "weightUnit": "kg",
+          "restSeconds": 0
+        }
+      ],
+      "media": [
+        {
+          "id": "MeSd9Xnk6RoCziYKeYQeX",
+          "type": "image",
+          "url": "/media/3b834724-932d-44d3-b070-90cec2348da7.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776266106542
+        }
+      ],
+      "instructions": "",
+      "tags": [],
+      "variations": [],
+      "id": "dx3W0eEOHqqjalsAucZKO",
+      "createdAt": 1776266119534
+    },
+    {
+      "name": "Loaded Butterfly",
+      "muscleGroups": [],
+      "equipment": [],
+      "defaultSetType": "timed",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "nVmoti2zzaUx1BA0RV3vV",
+          "type": "timed",
+          "reps": 8,
+          "durationSeconds": 60,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "wN0PA4hIkA5s-ZHKfIjFf",
+          "type": "timed",
+          "reps": 8,
+          "durationSeconds": 60,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "5n5YFxgCE0tabxVmzdCby",
+          "type": "image",
+          "url": "/media/e72d8611-5d07-49b4-b39b-1a6ec806aedc.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776266055258
+        }
+      ],
+      "instructions": "",
+      "tags": [],
+      "variations": [],
+      "id": "f2E9ezd9tcV8a9tdXNN46",
+      "createdAt": 1776266070006
+    },
+    {
+      "name": "Pigeon Strength",
+      "muscleGroups": [
+        "legs"
+      ],
+      "equipment": [
+        "bench"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "oUeVFq-xIUAJwu_xfHtuG",
+          "type": "reps",
+          "reps": 20,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "cnoh7tZeKofFEPqXXZd-k",
+          "type": "reps",
+          "reps": 20,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "Y7AT0kFXwl8mG3x7mns-j",
+          "type": "image",
+          "url": "/media/0883bd50-709c-42a1-857d-ce2ebdbfa33b.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776117114568
+        },
+        {
+          "id": "V-QUNe5ZUeqG9c9us9Ejt",
+          "type": "image",
+          "url": "/media/b75db9a0-5256-4c2e-905a-6a05bce7a87c.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776117117013
+        }
+      ],
+      "instructions": "https://videos.files.wordpress.com/POd2UXB2/pigeon-strength-_-lowbackability.com_.mp4\n\nhttps://lowbackability.com/2023/12/28/elevated-pigeon-outer-hip/",
+      "tags": [],
+      "variations": [],
+      "id": "fiJPOUDBPvxlh0R4hNz3_",
+      "createdAt": 1776117183546
     },
     {
       "name": "Shoulder dumbbell press",
@@ -169,7 +406,180 @@
       "ownerUserId": "local-default"
     }
   ],
-  "templates": [],
+  "templates": [
+    {
+      "id": "DE50TKZLYKU-Zo5pmdxgM",
+      "name": "Hip Mobility",
+      "tags": [],
+      "slots": [
+        {
+          "id": "0_uHp3zrQsjnVBpYalwTo",
+          "exerciseId": "dfu0kN7yYYUtvfwIAEGNm",
+          "orderIndex": 0,
+          "sets": [
+            {
+              "id": "YDoNVnL1he2bz0uG2HIX8",
+              "type": "timed",
+              "reps": 8,
+              "durationSeconds": 60,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "H1Lp7aVlgu5q_HwLkUqfB",
+              "type": "timed",
+              "reps": 8,
+              "durationSeconds": 60,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "id": "qZBJXYQjl47XTiMOKr_w_",
+          "exerciseId": "ECCy5ntqFUO3D22s7QttI",
+          "orderIndex": 1,
+          "sets": [
+            {
+              "id": "NItRzymle8eWCyfVqH8TH",
+              "type": "reps",
+              "reps": 10,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "VM8j4U2Jj20RBE9Eq_PGN",
+              "type": "reps",
+              "reps": 10,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "Kd3xYH1X7OaoaWREQVpgG",
+              "type": "reps",
+              "reps": 10,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "qP6CIxUKxw1l8NK2xNASw",
+              "type": "timed",
+              "reps": 10,
+              "durationSeconds": 30,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "AR5QLOmWwAfHl1MfcMkFZ",
+              "type": "timed",
+              "reps": 10,
+              "durationSeconds": 30,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            },
+            {
+              "id": "2YqdT14RZpZ7Ug63LpVYh",
+              "type": "timed",
+              "reps": 10,
+              "durationSeconds": 30,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "id": "C0u9uuYawccU6Noj7hsP3",
+          "exerciseId": "fiJPOUDBPvxlh0R4hNz3_",
+          "orderIndex": 2,
+          "sets": [
+            {
+              "id": "4h0SwIWWUs9goAaEYXqvw",
+              "type": "reps",
+              "reps": 20,
+              "weightUnit": "kg",
+              "restSeconds": 120
+            },
+            {
+              "id": "W9rhi2Hrps1V62ooeRlWV",
+              "type": "reps",
+              "reps": 20,
+              "weightUnit": "kg",
+              "restSeconds": 120
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "id": "wURq3wJoRbXF1PYW0WG8J",
+          "exerciseId": "BWLnDpmKI3F0Yoy6mYhub",
+          "orderIndex": 3,
+          "sets": [
+            {
+              "id": "gJkjfSJ7-OagGXWQ307Ti",
+              "type": "timed",
+              "reps": 10,
+              "weightUnit": "kg",
+              "restSeconds": 120,
+              "durationSeconds": 120
+            },
+            {
+              "id": "ryYf7qsln2Hz8B1mPBuH-",
+              "type": "timed",
+              "reps": 10,
+              "weightUnit": "kg",
+              "restSeconds": 120,
+              "durationSeconds": 120
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "id": "Y2gFQXcuEdA8NmMqmi27z",
+          "exerciseId": "f2E9ezd9tcV8a9tdXNN46",
+          "orderIndex": 4,
+          "sets": [
+            {
+              "id": "QwP5Tcm7Ok0YBMgFkmios",
+              "type": "timed",
+              "reps": 8,
+              "durationSeconds": 60,
+              "weightUnit": "kg",
+              "restSeconds": 120
+            },
+            {
+              "id": "WB4TfLY29jIxWnQ3FuCXU",
+              "type": "timed",
+              "reps": 8,
+              "durationSeconds": 60,
+              "weightUnit": "kg",
+              "restSeconds": 120
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "id": "Wu0hLVv1F4Xk-rRhnUmal",
+          "exerciseId": "dx3W0eEOHqqjalsAucZKO",
+          "orderIndex": 5,
+          "sets": [
+            {
+              "id": "Usppzz6hwzIJ-uLNTAOEr",
+              "type": "timed",
+              "reps": 8,
+              "durationSeconds": 60,
+              "weightUnit": "kg",
+              "restSeconds": 0
+            }
+          ],
+          "notes": ""
+        }
+      ],
+      "createdAt": 1776265344401,
+      "updatedAt": 1776267496780
+    }
+  ],
   "sessions": [],
   "personalRecords": [],
   "users": [
@@ -184,6 +594,20 @@
   "userSettings": [],
   "settings": {
     "defaultRestSeconds": 120,
+    "equipment": [
+      "barbell",
+      "dumbbell",
+      "kettlebell",
+      "cable",
+      "machine",
+      "bodyweight",
+      "resistance_band",
+      "smith_machine",
+      "pull_up_bar",
+      "rings",
+      "other",
+      "bench"
+    ],
     "muscleGroups": [
       "chest",
       "back",

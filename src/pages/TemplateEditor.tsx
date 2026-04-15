@@ -8,7 +8,7 @@ import { generateTemplate } from '@/lib/ai'
 import { useSettingsStore } from '@/stores/settingsStore'
 import PageHeader from '@/components/PageHeader'
 import ExerciseFormSheet from '@/components/ExerciseFormSheet'
-import type { WorkoutTemplate, ExerciseSlot, SetTarget } from '@/types'
+import type { WorkoutTemplate, ExerciseSlot, SetTarget, SetType } from '@/types'
 
 // Blank set with global default rest
 const blankSet = (rest = 120): SetTarget => ({
@@ -108,6 +108,25 @@ export default function TemplateEditor() {
     setSlots(s => s.map((slot, i) => i !== slotIdx ? slot : { ...slot, exerciseId, sets }))
   }
 
+  // Per-slot set mutations
+  const updateSet = (slotIdx: number, setIdx: number, patch: Partial<SetTarget>) =>
+    setSlots(s => s.map((slot, i) => i !== slotIdx ? slot : {
+      ...slot,
+      sets: slot.sets.map((set, j) => j !== setIdx ? set : { ...set, ...patch })
+    }))
+
+  const addSetToSlot = (slotIdx: number) =>
+    setSlots(s => s.map((slot, i) => i !== slotIdx ? slot : {
+      ...slot,
+      sets: [...slot.sets, blankSet(slot.sets[slot.sets.length - 1]?.restSeconds ?? defaultRest)]
+    }))
+
+  const removeSetFromSlot = (slotIdx: number, setIdx: number) =>
+    setSlots(s => s.map((slot, i) => i !== slotIdx ? slot : {
+      ...slot,
+      sets: slot.sets.filter((_, j) => j !== setIdx)
+    }))
+
   const addTag = () => {
     const t = tagInput.trim().toLowerCase()
     if (t && !tags.includes(t)) setTags(ts => [...ts, t])
@@ -196,28 +215,90 @@ export default function TemplateEditor() {
                 </button>
               </div>
 
-              {/* Set summary — read-only preview of the exercise's default sets */}
+              {/* Editable sets for this slot — independent of exercise defaults */}
               {slot.sets.length > 0 && (
-                <div className="space-y-1 mt-1">
-                  {slot.sets.map((set, i) => (
-                    <div key={set.id} className="flex items-center gap-2 text-xs text-slate-400 pl-6">
-                      <span className="text-slate-600 w-4">{i + 1}</span>
-                      <span className="capitalize">{set.type}</span>
-                      {set.type === 'timed'
-                        ? <span>{set.durationSeconds ?? '—'}s</span>
-                        : <span>{set.reps ?? '—'} reps</span>
-                      }
-                      {set.weight && <span>@ {set.weight}{set.weightUnit}</span>}
-                      <span className="text-slate-600">·</span>
-                      <span>{set.restSeconds === 0 ? 'no rest' : `${set.restSeconds}s rest`}</span>
+                <div className="mt-2 space-y-1.5">
+                  {/* Column headers */}
+                  <div className="grid grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1.5rem] gap-1 text-[10px] text-slate-600 uppercase tracking-wide pl-1 pr-1">
+                    <span />
+                    <span>Type</span>
+                    <span>{slot.sets.some(s => s.type === 'timed') ? 'Dur (s)' : 'Reps'}</span>
+                    <span>Wt (kg)</span>
+                    <span>Rest (s)</span>
+                    <span />
+                  </div>
+
+                  {slot.sets.map((set, setIdx) => (
+                    <div key={set.id} className="grid grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1.5rem] gap-1 items-center">
+                      {/* Row number */}
+                      <span className="text-[10px] text-slate-600 text-center">{setIdx + 1}</span>
+
+                      {/* Set type selector */}
+                      <select
+                        className="input text-[11px] px-1 py-0.5 h-7"
+                        value={set.type}
+                        onChange={e => updateSet(si, setIdx, { type: e.target.value as SetType })}
+                      >
+                        <option value="reps">Reps</option>
+                        <option value="timed">Time</option>
+                        <option value="failure">Fail</option>
+                      </select>
+
+                      {/* Reps or duration */}
+                      {set.type === 'timed' ? (
+                        <input
+                          className="input text-xs px-1.5 py-0.5 h-7 text-center"
+                          type="number" min={0}
+                          value={set.durationSeconds ?? ''}
+                          placeholder="—"
+                          onChange={e => updateSet(si, setIdx, { durationSeconds: e.target.value ? +e.target.value : undefined })}
+                        />
+                      ) : (
+                        <input
+                          className="input text-xs px-1.5 py-0.5 h-7 text-center"
+                          type="number" min={0}
+                          value={set.reps ?? ''}
+                          placeholder="—"
+                          onChange={e => updateSet(si, setIdx, { reps: e.target.value ? +e.target.value : undefined })}
+                        />
+                      )}
+
+                      {/* Weight */}
+                      <input
+                        className="input text-xs px-1.5 py-0.5 h-7 text-center"
+                        type="number" min={0} step={0.5}
+                        value={set.weight ?? ''}
+                        placeholder="—"
+                        onChange={e => updateSet(si, setIdx, { weight: e.target.value ? +e.target.value : undefined })}
+                      />
+
+                      {/* Rest */}
+                      <input
+                        className="input text-xs px-1.5 py-0.5 h-7 text-center"
+                        type="number" min={0} step={15}
+                        value={set.restSeconds}
+                        onChange={e => updateSet(si, setIdx, { restSeconds: e.target.value ? +e.target.value : 0 })}
+                      />
+
+                      {/* Remove set */}
+                      <button
+                        onClick={() => removeSetFromSlot(si, setIdx)}
+                        disabled={slot.sets.length === 1}
+                        className="p-0.5 rounded hover:bg-red-900/30 text-slate-600 hover:text-red-400 disabled:opacity-20 disabled:pointer-events-none"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
                   ))}
+
+                  {/* Add set to this slot */}
+                  <button
+                    onClick={() => addSetToSlot(si)}
+                    className="ml-6 mt-1 text-xs text-slate-500 hover:text-brand-400 flex items-center gap-1"
+                  >
+                    <Plus size={12} /> Add set
+                  </button>
                 </div>
-              )}
-              {ex && (
-                <p className="text-xs text-slate-600 mt-2 pl-6">
-                  Edit sets in the Exercise library to change defaults.
-                </p>
               )}
             </div>
           )

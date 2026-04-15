@@ -72,6 +72,7 @@ Go to **Settings → AI Provider** and set provider, model, and API key. Keys ar
 
 | Version | Notes |
 |---|---|
+| 0.7.0 | Template slots now have fully editable sets (type, reps/duration, weight, rest) independent of exercise defaults |
 | 0.6.0 | Store exercise media as files on disk (`public/media/`) via API server — nothing stored in browser memory; stale blob entries auto-purged on load |
 | 0.5.7 | Prevent Exercise editor crash when legacy media entries contain non-Blob payloads; show safe fallback instead of blank screen |
 | 0.5.6 | Make New Exercise sheet reach the bottom edge while staying layered above bottom navigation |

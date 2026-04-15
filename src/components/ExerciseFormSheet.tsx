@@ -56,6 +56,8 @@ function MediaGrid({
   onRemove: (id: string) => void
   onPreview: (item: ExerciseMedia) => void
 }) {
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+
   if (!items.length) return null
 
   return (
@@ -66,15 +68,35 @@ function MediaGrid({
             ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
             : <video src={item.url} className="w-full h-full object-cover" muted playsInline />
           }
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-            <button className="p-1.5 rounded-lg bg-slate-900/80 text-white" onClick={() => onPreview(item)}>
-              {item.type === 'video' ? <Play size={14} /> : <ZoomIn size={14} />}
-            </button>
-            <button className="p-1.5 rounded-lg bg-red-900/80 text-white" onClick={() => onRemove(item.id)}>
-              <X size={14} />
-            </button>
-          </div>
-          {item.type === 'video' && (
+          {confirmingId === item.id ? (
+            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-2">
+              <p className="text-white text-xs font-medium text-center">Delete?</p>
+              <div className="flex gap-1.5">
+                <button
+                  className="px-2.5 py-1 rounded-lg bg-red-600 text-white text-xs font-semibold"
+                  onClick={() => { setConfirmingId(null); onRemove(item.id) }}
+                >
+                  Delete
+                </button>
+                <button
+                  className="px-2.5 py-1 rounded-lg bg-slate-700 text-white text-xs"
+                  onClick={() => setConfirmingId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+              <button className="p-1.5 rounded-lg bg-slate-900/80 text-white" onClick={() => onPreview(item)}>
+                {item.type === 'video' ? <Play size={14} /> : <ZoomIn size={14} />}
+              </button>
+              <button className="p-1.5 rounded-lg bg-red-900/80 text-white" onClick={() => setConfirmingId(item.id)}>
+                <X size={14} />
+              </button>
+            </div>
+          )}
+          {item.type === 'video' && confirmingId !== item.id && (
             <div className="absolute bottom-1 right-1 bg-black/60 rounded px-1 py-0.5">
               <Play size={10} className="text-white" />
             </div>
