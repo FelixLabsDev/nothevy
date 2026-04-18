@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, TrendingUp, Dumbbell } from 'lucide-react'
+import { Play, Plus, TrendingUp, Dumbbell, FileText } from 'lucide-react'
 import { db } from '@/db'
 import { useActiveSessionStore } from '@/stores/sessionStore'
 import PageHeader from '@/components/PageHeader'
@@ -117,6 +117,10 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+
+      <button type="button" className="text-xs text-slate-500 hover:text-brand-400 mt-4 flex items-center gap-1.5" onClick={() => navigate('/docs')}>
+        <FileText size={14} /> Docs
+      </button>
     </div>
   )
 }

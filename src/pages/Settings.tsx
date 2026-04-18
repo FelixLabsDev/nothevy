@@ -30,7 +30,7 @@ const PROVIDERS: { id: AIProvider; label: string }[] = [
 // Export full DB to downloadable local-db.json seed file
 // ---------------------------------------------------------------------------
 async function exportDbSeed(): Promise<void> {
-  const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows] = await Promise.all([
+  const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows, docs, workouts] = await Promise.all([
     db.exercises.toArray(),
     db.templates.toArray(),
     db.sessions.toArray(),
@@ -38,11 +38,13 @@ async function exportDbSeed(): Promise<void> {
     db.users.toArray(),
     db.linkedAuthAccounts.toArray(),
     db.userSettings.toArray(),
-    db.settings.toArray()
+    db.settings.toArray(),
+    db.docs.toArray(),
+    db.workouts.toArray()
   ])
 
   const seed = {
-    meta: { name: 'NotHevy Local DB Seed', version: 2 },
+    meta: { name: 'NotHevy Local DB Seed', version: 4 },
     // Blobs cannot be represented in JSON — strip media attachments from exercises
     exercises: exercises.map(e => ({ ...e, media: [] })),
     templates,
@@ -51,6 +53,8 @@ async function exportDbSeed(): Promise<void> {
     users,
     linkedAuthAccounts,
     userSettings,
+    docs,
+    workouts,
     settings: Object.fromEntries(settingsRows.map(r => [r.key, r.value]))
   }
 

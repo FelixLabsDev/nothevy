@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CheckCircle, SkipForward, Timer, TrendingUp, MessageSquare, X } from 'lucide-react'
+import { CheckCircle, SkipForward, Timer, TrendingUp, MessageSquare, ChevronUp, ChevronDown, ListX } from 'lucide-react'
 import { db } from '@/db'
 import { useActiveSessionStore } from '@/stores/sessionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { getProgressionSuggestion } from '@/lib/workout'
 import { getSessionCoaching } from '@/lib/ai'
-import type { Exercise, PerformedSet } from '@/types'
+import type { Exercise, PerformedSet, PerformedSlot, DifficultyRating } from '@/types'
 
 // Format seconds as MM:SS
 function fmtTime(s: number): string {
@@ -22,7 +22,8 @@ export default function ActiveSession() {
   const {
     session, currentSlotIndex, currentSetIndex,
     restSecondsRemaining, restTimerActive,
-    completeSet, skipSet, selectVariation, advanceCursor,
+    completeSet, skipSet, skipSlot, selectVariation, advanceCursor,
+    goToSlot, reorderSlots, setSlotRating,
     startRestTimer, tickRestTimer, stopRestTimer, adjustRestTimer,
     endSession, clearSession, newPRExerciseIds
   } = useActiveSessionStore()
@@ -72,6 +73,31 @@ export default function ActiveSession() {
 
   const exName = (id: string) => exerciseCache.current[id]?.name ?? id
   const exVariations = (id: string) => exerciseCache.current[id]?.variations ?? []
+
+  const slotFullyDone = (slot: PerformedSlot) => slot.sets.every(s => s.completedAt || s.skipped)
+  const slotHasIncomplete = (slot: PerformedSlot) => slot.sets.some(s => !s.completedAt)
+
+  const jumpToSlot = (si: number) => {
+    stopRestTimer()
+    goToSlot(si)
+  }
+
+  const handleSkipExercise = (si: number) => {
+    if (!confirm('Skip this entire exercise?')) return
+    stopRestTimer()
+    skipSlot(si)
+  }
+
+  const handleReorder = (from: number, dir: -1 | 1) => {
+    const to = from + dir
+    if (to < 0 || to >= session.slots.length) return
+    stopRestTimer()
+    reorderSlots(from, to)
+  }
+
+  const rateDifficulty = (si: number, r: DifficultyRating) => {
+    setSlotRating(si, r)
+  }
 
   // Progressive overload suggestion for current exercise
   const [suggestion, setSuggestion] = useState<{ weight: number; reps: number; unit: string } | null>(null)
@@ -218,6 +244,10 @@ export default function ActiveSession() {
           </h2>
           {currentSlot.notes && <p className="text-xs text-slate-400 mb-2">{currentSlot.notes}</p>}
 
+          <button type="button" className="btn-ghost w-full text-xs text-slate-500 mb-3 py-1.5 flex items-center justify-center gap-1" onClick={() => handleSkipExercise(currentSlotIndex)}>
+            <ListX size={14} /> Skip entire exercise
+          </button>
+
           {/* Variation picker */}
           {exVariations(currentSlot.exerciseId).length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
@@ -313,36 +343,66 @@ export default function ActiveSession() {
         </div>
       )}
 
-      {/* Exercise overview list */}
+      {/* Exercise overview — tap row to jump, reorder incomplete, rate load when done */}
       <div className="space-y-2">
         {session.slots.map((slot, si) => {
           const doneCount = slot.sets.filter(s => s.completedAt || s.skipped).length
           const isCurrent = si === currentSlotIndex
+          const canReorder = slotHasIncomplete(slot)
           return (
             <div key={slot.id} className={`card ${isCurrent ? 'border-brand-600' : ''}`}>
-              <div className="flex items-center justify-between">
-                <p className={`font-medium text-sm ${isCurrent ? 'text-brand-300' : 'text-slate-300'}`}>
-                  {exName(slot.exerciseId) || 'Unknown'}
-                  {slot.selectedVariation && (
-                    <span className="text-slate-500 font-normal"> — {slot.selectedVariation}</span>
-                  )}
-                </p>
-                <p className="text-xs text-slate-500">{doneCount}/{slot.sets.length} sets</p>
+              <div className="flex items-start gap-2">
+                {canReorder && (
+                  <div className="flex flex-col gap-0.5 shrink-0 pt-0.5" onClick={e => e.stopPropagation()}>
+                    <button type="button" className="p-0.5 rounded hover:bg-slate-700 text-slate-500 disabled:opacity-30" disabled={si === 0} onClick={() => handleReorder(si, -1)} title="Move up"><ChevronUp size={16} /></button>
+                    <button type="button" className="p-0.5 rounded hover:bg-slate-700 text-slate-500 disabled:opacity-30" disabled={si === session.slots.length - 1} onClick={() => handleReorder(si, 1)} title="Move down"><ChevronDown size={16} /></button>
+                  </div>
+                )}
+                <button type="button" className="flex-1 text-left min-w-0" onClick={() => jumpToSlot(si)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`font-medium text-sm ${isCurrent ? 'text-brand-300' : 'text-slate-300'}`}>
+                      {exName(slot.exerciseId) || 'Unknown'}
+                      {slot.selectedVariation && (
+                        <span className="text-slate-500 font-normal"> — {slot.selectedVariation}</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-500 shrink-0">{doneCount}/{slot.sets.length} sets</p>
+                  </div>
+                  <div className="flex gap-1 mt-2">
+                    {slot.sets.map((s, i) => (
+                      <div
+                        key={s.id}
+                        className={`h-1.5 flex-1 rounded-full ${
+                          s.skipped ? 'bg-slate-600' :
+                          s.completedAt ? 'bg-brand-500' :
+                          (si === currentSlotIndex && i === currentSetIndex) ? 'bg-brand-800 ring-1 ring-brand-400' :
+                          'bg-slate-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </button>
+                {canReorder && (
+                  <button type="button" className="p-2 shrink-0 text-slate-500 hover:text-amber-400" title="Skip exercise" onClick={e => { e.stopPropagation(); handleSkipExercise(si) }}>
+                    <ListX size={18} />
+                  </button>
+                )}
               </div>
-              {/* Mini set indicators */}
-              <div className="flex gap-1 mt-2">
-                {slot.sets.map((s, i) => (
-                  <div
-                    key={s.id}
-                    className={`h-1.5 flex-1 rounded-full ${
-                      s.skipped ? 'bg-slate-600' :
-                      s.completedAt ? 'bg-brand-500' :
-                      (si === currentSlotIndex && i === currentSetIndex) ? 'bg-brand-800 ring-1 ring-brand-400' :
-                      'bg-slate-700'
-                    }`}
-                  />
-                ))}
-              </div>
+              {slotFullyDone(slot) && slot.difficultyRating === undefined && (
+                <div className="mt-3 pt-2 border-t border-slate-700/80" onClick={e => e.stopPropagation()}>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-1.5">Difficulty (1 too easy → 5 too hard)</p>
+                  <div className="flex gap-1.5">
+                    {([1, 2, 3, 4, 5] as const).map(n => (
+                      <button key={n} type="button" className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-brand-800 border border-slate-600 hover:border-brand-500 transition" onClick={() => rateDifficulty(si, n)}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {slot.difficultyRating !== undefined && (
+                <p className="text-[10px] text-slate-500 mt-2">Rated: {slot.difficultyRating}/5</p>
+              )}
             </div>
           )
         })}

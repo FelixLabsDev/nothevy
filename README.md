@@ -8,7 +8,8 @@ Fast, offline-first PWA workout tracker.
 
 - **Exercise library** — create reusable exercises with muscle groups, equipment and set defaults
 - **Template builder** — build workout plans manually or generate them with Claude AI
-- **Active session** — log sets in real-time with a guided flow, rest timer, and superset support
+- **Workouts** — combine multiple templates in order; configure which exercises to include, then run one session
+- **Active session** — log sets in real-time with a guided flow, rest timer, superset support, optional per-exercise load rating (1–5), reorder/skip exercises mid-session
 - **Progressive overload** — automatic suggestions based on your last session for each exercise
 - **PR detection** — 1RM estimated (Epley formula) and tracked after every session
 - **History + charts** — volume-over-time area chart, session recaps, PR log
@@ -72,6 +73,7 @@ Go to **Settings → AI Provider** and set provider, model, and API key. Keys ar
 
 | Version | Notes |
 |---|---|
+| 0.8.0 | Workouts (multi-template plans), setup screen, active session: jump between exercises, reorder, skip exercise, 1–5 load difficulty per exercise; Dexie `workouts` table; Docs link on Home |
 | 0.7.0 | Template slots now have fully editable sets (type, reps/duration, weight, rest) independent of exercise defaults |
 | 0.6.0 | Store exercise media as files on disk (`public/media/`) via API server — nothing stored in browser memory; stale blob entries auto-purged on load |
 | 0.5.7 | Prevent Exercise editor crash when legacy media entries contain non-Blob payloads; show safe fallback instead of blank screen |

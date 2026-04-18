@@ -119,8 +119,22 @@ export interface WorkoutTemplate {
 }
 
 // ---------------------------------------------------------------------------
+// Workout — combination of templates (ordered); used to build a session
+// ---------------------------------------------------------------------------
+export interface Workout {
+  id: string
+  ownerUserId?: string
+  name: string
+  tags: string[]
+  templateIds: string[]
+  createdAt: number
+  updatedAt: number
+}
+
+// ---------------------------------------------------------------------------
 // WorkoutSession — an instance of a template actually performed
 // ---------------------------------------------------------------------------
+export type DifficultyRating = 1 | 2 | 3 | 4 | 5
 export interface PerformedSet extends SetTarget {
   actualReps?: number
   actualDurationSeconds?: number
@@ -132,12 +146,15 @@ export interface PerformedSet extends SetTarget {
 
 export interface PerformedSlot extends Omit<ExerciseSlot, 'sets'> {
   sets: PerformedSet[]
+  /** 1 = too easy … 5 = too hard; set after finishing all sets for this exercise */
+  difficultyRating?: DifficultyRating
 }
 
 export interface WorkoutSession {
   id: string
   ownerUserId?: string
   templateId?: string
+  workoutId?: string
   name: string
   startedAt: number
   completedAt?: number

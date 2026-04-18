@@ -1,8 +1,23 @@
 import { create } from 'zustand'
 import { nanoid } from '@/lib/workout'
-import type { WorkoutSession, PerformedSlot, PerformedSet, WorkoutTemplate } from '@/types'
+import type { WorkoutSession, PerformedSlot, PerformedSet, WorkoutTemplate, ExerciseSlot, DifficultyRating } from '@/types'
 import { db } from '@/db'
 import { calcSessionVolume, detectAndSavePRs } from '@/lib/workout'
+
+// Map template/slot rows into performed slots (shared by startSession / startWorkout)
+function slotsToPerformed(slotsInput: ExerciseSlot[]): PerformedSlot[] {
+  return slotsInput.map((slot, orderIndex) => ({
+    ...slot,
+    orderIndex,
+    sets: slot.sets.map(s => ({
+      ...s,
+      skipped: false,
+      actualWeight: s.weight,
+      actualReps: s.reps,
+      actualDurationSeconds: s.durationSeconds
+    }))
+  }))
+}
 
 // ---------------------------------------------------------------------------
 // Active session store — manages the in-progress workout state
@@ -16,10 +31,15 @@ interface ActiveSessionStore {
   newPRExerciseIds: string[]
 
   startSession: (template: WorkoutTemplate) => void
+  startWorkout: (workoutId: string, name: string, slots: ExerciseSlot[]) => void
   startAdHocSession: (name: string) => void
   completeSet: (slotIdx: number, setIdx: number, updates: Partial<PerformedSet>) => void
   skipSet: (slotIdx: number, setIdx: number) => void
+  skipSlot: (slotIdx: number) => void
   selectVariation: (slotIdx: number, variation: string | undefined) => void
+  goToSlot: (slotIdx: number) => void
+  reorderSlots: (from: number, to: number) => void
+  setSlotRating: (slotIdx: number, rating: DifficultyRating) => void
   advanceCursor: () => void
   startRestTimer: (seconds: number) => void
   adjustRestTimer: (delta: number) => void
@@ -40,21 +60,26 @@ export const useActiveSessionStore = create<ActiveSessionStore>((set, get) => ({
   // Start a session from a template — deep-copy all slots and sets
   startSession: (template) => {
     const now = Date.now()
-    const slots: PerformedSlot[] = template.slots.map(slot => ({
-      ...slot,
-      sets: slot.sets.map(s => ({
-        ...s,
-        skipped: false,
-        actualWeight: s.weight,
-        actualReps: s.reps,
-        actualDurationSeconds: s.durationSeconds
-      }))
-    }))
+    const slots = slotsToPerformed(template.slots)
     const session: WorkoutSession = {
       id: nanoid(),
       templateId: template.id,
       name: template.name,
       startedAt: now,
+      slots,
+      totalVolumeKg: 0
+    }
+    set({ session, currentSlotIndex: 0, currentSetIndex: 0, newPRExerciseIds: [] })
+  },
+
+  // Start from a saved Workout after setup — merged slots, no templateId
+  startWorkout: (workoutId, name, slotsInput) => {
+    const slots = slotsToPerformed(slotsInput)
+    const session: WorkoutSession = {
+      id: nanoid(),
+      workoutId,
+      name,
+      startedAt: Date.now(),
       slots,
       totalVolumeKg: 0
     }
@@ -104,11 +129,59 @@ export const useActiveSessionStore = create<ActiveSessionStore>((set, get) => ({
     set({ session: { ...session, slots } })
   },
 
+  // Skip every remaining set in a slot (whole exercise)
+  skipSlot: (slotIdx) => {
+    const { session } = get()
+    if (!session) return
+    const now = Date.now()
+    const slots = session.slots.map((slot, si) => {
+      if (si !== slotIdx) return slot
+      return {
+        ...slot,
+        sets: slot.sets.map(s => (s.completedAt ? s : { ...s, skipped: true, completedAt: now }))
+      }
+    })
+    set({ session: { ...session, slots } })
+    get().advanceCursor()
+  },
+
   selectVariation: (slotIdx, variation) => {
     const { session } = get()
     if (!session) return
     const slots = session.slots.map((slot, si) =>
       si !== slotIdx ? slot : { ...slot, selectedVariation: variation }
+    )
+    set({ session: { ...session, slots } })
+  },
+
+  goToSlot: (slotIdx) => {
+    const { session } = get()
+    if (!session || slotIdx < 0 || slotIdx >= session.slots.length) return
+    const slot = session.slots[slotIdx]
+    const firstIncomplete = slot.sets.findIndex(s => !s.completedAt)
+    if (firstIncomplete !== -1) set({ currentSlotIndex: slotIdx, currentSetIndex: firstIncomplete })
+    else set({ currentSlotIndex: slotIdx, currentSetIndex: Math.max(0, slot.sets.length - 1) })
+  },
+
+  reorderSlots: (from, to) => {
+    const { session, currentSlotIndex } = get()
+    if (!session || from < 0 || to < 0 || from >= session.slots.length || to >= session.slots.length || from === to) return
+    const currentId = session.slots[currentSlotIndex]?.id
+    const slots = [...session.slots]
+    const [moved] = slots.splice(from, 1)
+    slots.splice(to, 0, moved)
+    const newIdx = currentId ? slots.findIndex(s => s.id === currentId) : 0
+    set({
+      session: { ...session, slots: slots.map((s, i) => ({ ...s, orderIndex: i })) },
+      currentSlotIndex: newIdx >= 0 ? newIdx : 0
+    })
+  },
+
+  setSlotRating: (slotIdx, rating) => {
+    const { session } = get()
+    if (!session) return
+    const slots = session.slots.map((slot, si) =>
+      si !== slotIdx ? slot : { ...slot, difficultyRating: rating }
     )
     set({ session: { ...session, slots } })
   },

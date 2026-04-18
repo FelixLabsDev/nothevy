@@ -70,7 +70,12 @@ export default function SessionRecap() {
       <div className="space-y-3">
         {session.slots.map(slot => (
           <div key={slot.id} className="card">
-            <p className="font-semibold mb-2">{exName(slot.exerciseId)}</p>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="font-semibold">{exName(slot.exerciseId)}</p>
+              {slot.difficultyRating != null && (
+                <span className="text-xs text-slate-500 shrink-0">Load {slot.difficultyRating}/5</span>
+              )}
+            </div>
             <div className="space-y-1">
               {slot.sets.map((set, i) => (
                 <div key={set.id} className="flex items-center gap-3 text-sm">

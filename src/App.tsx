@@ -15,6 +15,9 @@ import Settings from '@/pages/Settings'
 import SettingsDefaults from '@/pages/SettingsDefaults'
 import Docs from '@/pages/Docs'
 import DocEditor from '@/pages/DocEditor'
+import Workouts from '@/pages/Workouts'
+import WorkoutEditor from '@/pages/WorkoutEditor'
+import WorkoutSetup from '@/pages/WorkoutSetup'
 
 // ---------------------------------------------------------------------------
 // SyncWatcher — uses useLiveQuery (reliable Dexie 4 change detection) to
@@ -26,12 +29,13 @@ function SyncWatcher() {
   const exercises = useLiveQuery(() => db.exercises.toArray(), [])
   const templates = useLiveQuery(() => db.templates.toArray(), [])
   const docs      = useLiveQuery(() => db.docs.toArray(), [])
+  const workouts  = useLiveQuery(() => db.workouts.toArray(), [])
   const sessionCount = useLiveQuery(() => db.sessions.count(), [])
   const prCount      = useLiveQuery(() => db.personalRecords.count(), [])
 
   useEffect(() => {
     if (!_isLoading) scheduleSyncToFile()
-  }, [exercises, templates, docs, sessionCount, prCount])
+  }, [exercises, templates, docs, workouts, sessionCount, prCount])
 
   return null
 }
@@ -60,7 +64,7 @@ export default function App() {
   }, [settings.theme])
 
   // Expose syncToFile on window for emergency console access (dev only)
-  useEffect(() => { (window as Record<string, unknown>).syncToFile = syncToFile }, [])
+  useEffect(() => { (window as unknown as Record<string, unknown>).syncToFile = syncToFile }, [])
 
   return (
     <div className="max-w-lg mx-auto min-h-screen relative">
@@ -71,6 +75,10 @@ export default function App() {
         <Route path="/templates" element={<Templates />} />
         <Route path="/templates/new" element={<TemplateEditor />} />
         <Route path="/templates/:id" element={<TemplateEditor />} />
+        <Route path="/workouts" element={<Workouts />} />
+        <Route path="/workouts/new" element={<WorkoutEditor />} />
+        <Route path="/workouts/:id" element={<WorkoutEditor />} />
+        <Route path="/workouts/:id/setup" element={<WorkoutSetup />} />
         <Route path="/session/active" element={<ActiveSession />} />
         <Route path="/session/:id" element={<SessionRecap />} />
         <Route path="/history" element={<History />} />

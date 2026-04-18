@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Exercise, WorkoutTemplate, WorkoutSession, PersonalRecord, AppUser, LinkedAuthAccount, UserSettingRow, Doc } from '@/types'
+import type { Exercise, WorkoutTemplate, Workout, WorkoutSession, PersonalRecord, AppUser, LinkedAuthAccount, UserSettingRow, Doc } from '@/types'
 
 // ---------------------------------------------------------------------------
 // Dexie database — single source of truth for all local data
@@ -14,6 +14,7 @@ class NotHevyDB extends Dexie {
   linkedAuthAccounts!: Table<LinkedAuthAccount, string>
   userSettings!: Table<UserSettingRow, string>
   docs!: Table<Doc, string>
+  workouts!: Table<Workout, string>
 
   constructor() {
     super('NotHevyDB')
@@ -69,6 +70,20 @@ class NotHevyDB extends Dexie {
       userSettings:       'id, userId, key, [userId+key]',
       docs:               'id, title, updatedAt'
     })
+
+    // Workouts — combinations of templates
+    this.version(4).stores({
+      exercises:          'id, ownerUserId, name, *muscleGroups, *tags, createdAt',
+      templates:          'id, ownerUserId, name, *tags, updatedAt',
+      sessions:           'id, ownerUserId, templateId, workoutId, startedAt, completedAt',
+      personalRecords:    'id, ownerUserId, exerciseId, type, achievedAt',
+      settings:           'key',
+      users:              'id, email, isActive, createdAt, lastLoginAt',
+      linkedAuthAccounts: 'id, userId, provider, providerAccountId, [provider+providerAccountId]',
+      userSettings:       'id, userId, key, [userId+key]',
+      docs:               'id, title, updatedAt',
+      workouts:           'id, ownerUserId, name, *tags, updatedAt'
+    })
   }
 }
 
@@ -88,7 +103,7 @@ export function scheduleSyncToFile() {
 }
 
 // Expose manual trigger on window for emergency console access
-if (typeof window !== 'undefined') (window as Record<string, unknown>).syncToFile = () => syncToFile()
+if (typeof window !== 'undefined') (window as unknown as Record<string, unknown>).syncToFile = () => syncToFile()
 
 // ---------------------------------------------------------------------------
 // Settings helpers — typed get/set wrappers
@@ -126,6 +141,7 @@ type LocalDbSeed = {
   userSettings?: UserSettingRow[]
   settings?: Record<string, unknown>
   docs?: Doc[]
+  workouts?: Workout[]
 }
 
 function normalizeExerciseMedia(exercise: Omit<Exercise, 'media'> & { media?: Exercise['media'] }): Exercise {
@@ -150,12 +166,12 @@ export async function loadFromFile(): Promise<void> {
     try {
       await db.transaction('rw', [
         db.exercises, db.templates, db.sessions, db.personalRecords,
-        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs
+        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs, db.workouts
       ], async () => {
         await Promise.all([
           db.exercises.clear(), db.templates.clear(), db.sessions.clear(),
           db.personalRecords.clear(), db.settings.clear(), db.users.clear(),
-          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear()
+          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear(), db.workouts.clear()
         ])
         if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
         if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
@@ -165,6 +181,7 @@ export async function loadFromFile(): Promise<void> {
         if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
         if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
         if (seed.docs?.length) await db.docs.bulkPut(seed.docs)
+        if (seed.workouts?.length) await db.workouts.bulkPut(seed.workouts)
         if (seed.settings) {
           const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
           if (rows.length) await db.settings.bulkPut(rows)
@@ -192,12 +209,12 @@ async function _bootstrapFromStaticSeed(): Promise<void> {
     try {
       await db.transaction('rw', [
         db.exercises, db.templates, db.sessions, db.personalRecords,
-        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs
+        db.settings, db.users, db.linkedAuthAccounts, db.userSettings, db.docs, db.workouts
       ], async () => {
         await Promise.all([
           db.exercises.clear(), db.templates.clear(), db.sessions.clear(),
           db.personalRecords.clear(), db.settings.clear(), db.users.clear(),
-          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear()
+          db.linkedAuthAccounts.clear(), db.userSettings.clear(), db.docs.clear(), db.workouts.clear()
         ])
         if (seed.exercises?.length) await db.exercises.bulkPut(seed.exercises.map(normalizeExerciseMedia))
         if (seed.templates?.length) await db.templates.bulkPut(seed.templates)
@@ -207,6 +224,7 @@ async function _bootstrapFromStaticSeed(): Promise<void> {
         if (seed.linkedAuthAccounts?.length) await db.linkedAuthAccounts.bulkPut(seed.linkedAuthAccounts)
         if (seed.userSettings?.length) await db.userSettings.bulkPut(seed.userSettings)
         if (seed.docs?.length) await db.docs.bulkPut(seed.docs)
+        if (seed.workouts?.length) await db.workouts.bulkPut(seed.workouts)
         if (seed.settings) {
           const rows = Object.entries(seed.settings).map(([key, value]) => ({ key, value }))
           if (rows.length) await db.settings.bulkPut(rows)
@@ -224,17 +242,17 @@ async function _bootstrapFromStaticSeed(): Promise<void> {
 // ---------------------------------------------------------------------------
 export async function syncToFile(): Promise<void> {
   try {
-    const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows, docs] = await Promise.all([
+    const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows, docs, workouts] = await Promise.all([
       db.exercises.toArray(), db.templates.toArray(), db.sessions.toArray(),
       db.personalRecords.toArray(), db.users.toArray(), db.linkedAuthAccounts.toArray(),
-      db.userSettings.toArray(), db.settings.toArray(), db.docs.toArray()
+      db.userSettings.toArray(), db.settings.toArray(), db.docs.toArray(), db.workouts.toArray()
     ])
 
     const settings = Object.fromEntries(settingsRows.map(r => [r.key, r.value]))
     const payload: LocalDbSeed = {
-      meta: { name: 'NotHevyDB', version: 3 },
+      meta: { name: 'NotHevyDB', version: 4 },
       exercises, templates, sessions, personalRecords,
-      users, linkedAuthAccounts, userSettings, settings, docs
+      users, linkedAuthAccounts, userSettings, settings, docs, workouts
     }
 
     await fetch('/api/db', {
