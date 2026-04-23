@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useSettingsStore } from '@/stores/settingsStore'
-import { loadFromFile, scheduleSyncToFile, syncToFile, _isLoading, db } from '@/db'
+import { loadFromFile, scheduleSyncToFile, syncToFile, _isLoading, _isInitialized, db } from '@/db'
 import BottomNav from '@/components/BottomNav'
 import Dashboard from '@/pages/Dashboard'
 import Exercises from '@/pages/Exercises'
@@ -34,7 +34,7 @@ function SyncWatcher() {
   const prCount      = useLiveQuery(() => db.personalRecords.count(), [])
 
   useEffect(() => {
-    if (!_isLoading) scheduleSyncToFile()
+    if (!_isLoading && _isInitialized) scheduleSyncToFile()
   }, [exercises, templates, docs, workouts, sessionCount, prCount])
 
   return null
@@ -50,7 +50,6 @@ export default function App() {
   useEffect(() => {
     const apply = (dark: boolean) => {
       document.documentElement.classList.toggle('dark', dark)
-      localStorage.setItem('notHevy_theme', dark ? 'dark' : 'light')
     }
     const theme = settings.theme ?? 'dark'
     if (theme === 'dark') { apply(true); return }

@@ -91,15 +91,21 @@ export const db = new NotHevyDB()
 
 // ---------------------------------------------------------------------------
 // Auto-sync state — managed externally by SyncWatcher (React component).
-// _isLoading flag prevents sync during loadFromFile() bulk writes.
+// _isLoading: blocks sync during loadFromFile() bulk writes.
+// _isInitialized: blocks sync until the first loadFromFile() completes,
+//   preventing stale IndexedDB data (from a different browser session) from
+//   overwriting local-db.json before fresh data has been loaded.
 // ---------------------------------------------------------------------------
 export let _isLoading = false
+export let _isInitialized = false
 let _syncTimer: ReturnType<typeof setTimeout> | null = null
 
 export function scheduleSyncToFile() {
-  if (_isLoading) return
+  if (_isLoading || !_isInitialized) return
   if (_syncTimer) clearTimeout(_syncTimer)
-  _syncTimer = setTimeout(() => void syncToFile(), 800)
+  _syncTimer = setTimeout(() => {
+    if (!_isLoading && _isInitialized) void syncToFile()
+  }, 800)
 }
 
 // Expose manual trigger on window for emergency console access
@@ -154,8 +160,18 @@ function normalizeExerciseMedia(exercise: Omit<Exercise, 'media'> & { media?: Ex
 // loadFromFile — always loads fresh from /api/db (local file via API server).
 // Falls back to the static public/local-db.json seed on first run only if the
 // API server is unavailable (e.g. production build / PWA).
+//
+// Marks _isInitialized = false for the duration of the load so that the
+// SyncWatcher cannot race and write stale IndexedDB data back to the file.
+// _isInitialized is set to true in the finally block regardless of outcome.
 // ---------------------------------------------------------------------------
 export async function loadFromFile(): Promise<void> {
+  // Block syncs and cancel any pending timer immediately — before the async
+  // fetch — so stale IndexedDB data from a prior browser session can never
+  // overwrite local-db.json while we are fetching the authoritative copy.
+  _isInitialized = false
+  if (_syncTimer) { clearTimeout(_syncTimer); _syncTimer = null }
+
   try {
     const response = await fetch('/api/db', { cache: 'no-store' })
     if (!response.ok) throw new Error('API not available')
@@ -193,6 +209,9 @@ export async function loadFromFile(): Promise<void> {
   } catch {
     // API server not available — fall back to static seed file (first-run only)
     await _bootstrapFromStaticSeed()
+  } finally {
+    // Allow syncs now that IndexedDB reflects the authoritative file state.
+    _isInitialized = true
   }
 }
 
@@ -241,6 +260,7 @@ async function _bootstrapFromStaticSeed(): Promise<void> {
 // Called automatically via debounced hooks after every write.
 // ---------------------------------------------------------------------------
 export async function syncToFile(): Promise<void> {
+  if (_isLoading || !_isInitialized) return
   try {
     const [exercises, templates, sessions, personalRecords, users, linkedAuthAccounts, userSettings, settingsRows, docs, workouts] = await Promise.all([
       db.exercises.toArray(), db.templates.toArray(), db.sessions.toArray(),

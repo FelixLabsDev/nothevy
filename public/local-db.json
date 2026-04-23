@@ -199,6 +199,55 @@
       "createdAt": 1776265296390
     },
     {
+      "name": "Side delt raise",
+      "muscleGroups": [
+        "shoulders"
+      ],
+      "equipment": [
+        "cable"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "wT-U_5H8ItXhGVK2VmFTp",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "qF5Ip_dd1zitfsgcD_yd3",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "mZu3hc9cLf5Jab7VSLvhn",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "IbONu-twJpZY1Jn5ZbQJl",
+          "type": "image",
+          "url": "/media/39fe1d20-6a40-48db-bb52-a8cddee6c22d.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776937659704
+        }
+      ],
+      "instructions": "Check form, cable at hip height, cable across body\n\nhttps://www.youtube.com/shorts/f_OGBg2KxgY",
+      "tags": [],
+      "variations": [],
+      "id": "ISn-5WaW4fesUr2UkbmIm",
+      "createdAt": 1776937806771
+    },
+    {
       "name": "Couch Stretch",
       "muscleGroups": [
         "legs"
@@ -273,14 +322,67 @@
       "createdAt": 1776266119534
     },
     {
+      "name": "Chest incline press",
+      "muscleGroups": [
+        "chest"
+      ],
+      "equipment": [
+        "bench",
+        "barbell",
+        "dumbbell"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "LC1n-tmOE0GUQdWMgOZ7k",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "TnMTTFgj-Bq7LzjZpyCKS",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "Vp-sSJm-mki_xBi2BH79l",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "ayoxHObXDvP5BayO8QHhs",
+          "type": "image",
+          "url": "/media/2f96c711-0beb-4b49-9c00-887bebffdc2f.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776937090361
+        }
+      ],
+      "instructions": "30 degree incline\n\nhttps://www.youtube.com/watch?v=ZyjQar-XgBc",
+      "tags": [],
+      "variations": [],
+      "id": "eMGWxQkEZImCoyGU3YFm3",
+      "createdAt": 1776937120137
+    },
+    {
       "name": "Loaded Butterfly",
-      "muscleGroups": [],
+      "muscleGroups": [
+        "hips"
+      ],
       "equipment": [],
       "defaultSetType": "timed",
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "nVmoti2zzaUx1BA0RV3vV",
+          "id": "Z1duQmgP2pk4o1lryGzhR",
           "type": "timed",
           "reps": 8,
           "durationSeconds": 60,
@@ -288,7 +390,7 @@
           "restSeconds": 120
         },
         {
-          "id": "wN0PA4hIkA5s-ZHKfIjFf",
+          "id": "cw5_GSknIzUYUycd_MUCT",
           "type": "timed",
           "reps": 8,
           "durationSeconds": 60,
@@ -363,7 +465,7 @@
       "createdAt": 1776117183546
     },
     {
-      "name": "Shoulder dumbbell press",
+      "name": "Shoulder seated dumbbell press",
       "muscleGroups": [
         "shoulders"
       ],
@@ -374,7 +476,7 @@
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "nYhSdSnl9588ROK2vsqHt",
+          "id": "xI-NnBJo7S8nvj5vyj7i1",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,
@@ -382,7 +484,7 @@
           "restSeconds": 120
         },
         {
-          "id": "5LBTn3VlJhVInr4kbi10y",
+          "id": "vuJcfCxQHeWoKLPbLtdVl",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,
@@ -390,7 +492,7 @@
           "restSeconds": 120
         },
         {
-          "id": "M1eA3mRaj5bA4A0jrNfsf",
+          "id": "rC7j8AzqLWbl5uZtdXgoK",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,
@@ -398,12 +500,81 @@
           "restSeconds": 120
         }
       ],
-      "media": [],
+      "media": [
+        {
+          "id": "YKiWOAtmkEgvO9D8yvOBe",
+          "type": "image",
+          "url": "/media/0b5d1a76-c92e-45d2-ba6a-041d5e924c50.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776939054265
+        }
+      ],
       "instructions": "",
       "tags": [],
       "id": "keZTUnHHZPeuOztui-Cs1",
       "createdAt": 1775421652721,
-      "ownerUserId": "local-default"
+      "ownerUserId": "local-default",
+      "variations": []
+    },
+    {
+      "name": "Chest fly",
+      "muscleGroups": [
+        "chest"
+      ],
+      "equipment": [
+        "cable",
+        "machine",
+        "dumbbell"
+      ],
+      "defaultSetType": "reps",
+      "defaultRestSeconds": 120,
+      "defaultSets": [
+        {
+          "id": "FWDSbVYpbM8fwtRl7R5pG",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "L1VPVOfqh-fyyx6E-mKkj",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        },
+        {
+          "id": "5FaMAD4Q8_Y2UicafApFI",
+          "type": "reps",
+          "reps": 10,
+          "weightUnit": "kg",
+          "restSeconds": 120
+        }
+      ],
+      "media": [
+        {
+          "id": "Dd9BwQU031HxHcYe_IkRa",
+          "type": "image",
+          "url": "/media/db2ca4a6-d7cd-44fd-bbe9-710f61d78e0e.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776937291542
+        },
+        {
+          "id": "Ubd9zhwinIxCUmXb5s5sG",
+          "type": "image",
+          "url": "/media/050b3314-dbd9-41bb-8522-e67c1deeec01.png",
+          "mimeType": "image/png",
+          "name": "image.png",
+          "addedAt": 1776937352752
+        }
+      ],
+      "instructions": "Try to use cables, if unavailable use peck deck machine, finish with half reps in the stretched position",
+      "tags": [],
+      "variations": [],
+      "id": "tQMdzEcFQcTO8vM_VY37k",
+      "createdAt": 1776937356401
     }
   ],
   "templates": [
@@ -623,7 +794,8 @@
       "traps",
       "lats",
       "full_body",
-      "legs"
+      "legs",
+      "hips"
     ],
     "theme": "dark"
   },

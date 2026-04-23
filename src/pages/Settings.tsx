@@ -148,7 +148,6 @@ export default function Settings() {
                     update('theme', t)
                     const isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
                     document.documentElement.classList.toggle('dark', isDark)
-                    localStorage.setItem('notHevy_theme', isDark ? 'dark' : 'light')
                   }}
                 >
                   {t}
