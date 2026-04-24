@@ -204,27 +204,28 @@
         "shoulders"
       ],
       "equipment": [
-        "cable"
+        "cable",
+        "dumbbell"
       ],
       "defaultSetType": "reps",
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "wT-U_5H8ItXhGVK2VmFTp",
+          "id": "kT59_y0wXsmtgYR0CO9LO",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "qF5Ip_dd1zitfsgcD_yd3",
+          "id": "aegPsR5m8NZuWR0QGbVA6",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
           "restSeconds": 120
         },
         {
-          "id": "mZu3hc9cLf5Jab7VSLvhn",
+          "id": "y26wlBMBWaeYnfncrTlB0",
           "type": "reps",
           "reps": 10,
           "weightUnit": "kg",
@@ -470,13 +471,14 @@
         "shoulders"
       ],
       "equipment": [
-        "dumbbell"
+        "dumbbell",
+        "bench"
       ],
       "defaultSetType": "reps",
       "defaultRestSeconds": 120,
       "defaultSets": [
         {
-          "id": "xI-NnBJo7S8nvj5vyj7i1",
+          "id": "KYfXWBiaEKMBoIl4SzB8n",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,
@@ -484,7 +486,7 @@
           "restSeconds": 120
         },
         {
-          "id": "vuJcfCxQHeWoKLPbLtdVl",
+          "id": "E6Y95fK6uCUDKbFAQ_tG_",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,
@@ -492,7 +494,7 @@
           "restSeconds": 120
         },
         {
-          "id": "rC7j8AzqLWbl5uZtdXgoK",
+          "id": "O6cf_IoAFrOsC7mtjtKWD",
           "type": "reps",
           "reps": 10,
           "weight": 27.5,

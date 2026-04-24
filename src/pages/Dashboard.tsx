@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, TrendingUp, Dumbbell, FileText } from 'lucide-react'
+import { Play, Plus, TrendingUp, Dumbbell, FileText, Shuffle } from 'lucide-react'
 import { db } from '@/db'
 import { useActiveSessionStore } from '@/stores/sessionStore'
 import PageHeader from '@/components/PageHeader'
@@ -48,6 +48,21 @@ export default function Dashboard() {
           </button>
         </div>
       )}
+
+      {/* Custom workout shortcut */}
+      <button
+        className="card w-full flex items-center gap-3 mb-4 hover:border-indigo-500/40 transition group"
+        onClick={() => navigate('/custom-workout')}
+      >
+        <div className="w-10 h-10 rounded-xl bg-indigo-600/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-600/30 transition">
+          <Shuffle size={18} className="text-indigo-400" />
+        </div>
+        <div className="text-left flex-1 min-w-0">
+          <p className="font-medium">Custom Workout</p>
+          <p className="text-xs text-slate-500">Pick exercises by muscle group or add templates</p>
+        </div>
+        <Play size={16} className="text-slate-500 group-hover:text-indigo-400 transition shrink-0" />
+      </button>
 
       {/* Quick-start templates */}
       <section className="mb-6">

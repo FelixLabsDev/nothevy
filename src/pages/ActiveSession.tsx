@@ -61,18 +61,17 @@ export default function ActiveSession() {
   const currentSlot = session.slots[currentSlotIndex]
   const currentSet = currentSlot?.sets[currentSetIndex]
 
-  // Fetch exercise name for display
-  const AllExerciseIds = [...new Set(session.slots.map(s => s.exerciseId))]
+  // Resolve exercise data — useLiveQuery return value drives re-renders
+  const allExerciseIds = [...new Set(session.slots.map(s => s.exerciseId))]
+  const exerciseMap = useLiveQuery(async () => {
+    const exs = await db.exercises.bulkGet(allExerciseIds)
+    const map: Record<string, Exercise> = {}
+    exs.forEach(e => { if (e) map[e.id] = e })
+    return map
+  }, [allExerciseIds.join(',')]) ?? {}
 
-  // Resolve exercise data eagerly via a ref-style cache
-  const exerciseCache = useRef<Record<string, Exercise>>({})
-  useLiveQuery(async () => {
-    const exs = await db.exercises.bulkGet(AllExerciseIds)
-    exs.forEach(e => { if (e) exerciseCache.current[e.id] = e })
-  }, [AllExerciseIds.join(',')])
-
-  const exName = (id: string) => exerciseCache.current[id]?.name ?? id
-  const exVariations = (id: string) => exerciseCache.current[id]?.variations ?? []
+  const exName = (id: string) => exerciseMap[id]?.name ?? id
+  const exVariations = (id: string) => exerciseMap[id]?.variations ?? []
 
   const slotFullyDone = (slot: PerformedSlot) => slot.sets.every(s => s.completedAt || s.skipped)
   const slotHasIncomplete = (slot: PerformedSlot) => slot.sets.some(s => !s.completedAt)

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus, Search, X } from 'lucide-react'
+import { Plus, Search, X, SlidersHorizontal } from 'lucide-react'
 import { db } from '@/db'
 import { useSettingsStore } from '@/stores/settingsStore'
 import PageHeader from '@/components/PageHeader'
@@ -46,15 +46,48 @@ export default function Exercises() {
   const [sort, setSort] = useState<SortMode>('muscle')
   const [showForm, setShowForm] = useState(false)
   const [editExercise, setEditExercise] = useState<Exercise | undefined>(undefined)
+  const [activeMuscles, setActiveMuscles] = useState<string[]>([])
+  const [activeTags, setActiveTags] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
   const { settings } = useSettingsStore()
   const imagePreview = settings.exerciseImagePreview !== false
 
   const exercises = useLiveQuery(() => db.exercises.orderBy('name').toArray(), [])
 
-  const filtered = exercises?.filter(e =>
-    e.name.toLowerCase().includes(search.toLowerCase()) ||
-    e.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
-  ) ?? []
+  const allMuscles = useMemo(() => {
+    const set = new Set<string>()
+    exercises?.forEach(e => e.muscleGroups.forEach(m => set.add(m)))
+    return [...set].sort()
+  }, [exercises])
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    exercises?.forEach(e => e.tags.forEach(t => set.add(t)))
+    return [...set].sort()
+  }, [exercises])
+
+  const filtered = useMemo(() => {
+    return exercises?.filter(e => {
+      const matchesSearch = !search ||
+        e.name.toLowerCase().includes(search.toLowerCase()) ||
+        e.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
+      const matchesMuscle = activeMuscles.length === 0 ||
+        activeMuscles.some(m => e.muscleGroups.includes(m))
+      const matchesTag = activeTags.length === 0 ||
+        activeTags.some(t => e.tags.includes(t))
+      return matchesSearch && matchesMuscle && matchesTag
+    }) ?? []
+  }, [exercises, search, activeMuscles, activeTags])
+
+  const activeFilterCount = activeMuscles.length + activeTags.length
+
+  const toggleMuscle = (m: string) =>
+    setActiveMuscles(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])
+
+  const toggleTag = (t: string) =>
+    setActiveTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
+
+  const clearFilters = () => { setActiveMuscles([]); setActiveTags([]) }
 
   const groups = buildGroups(filtered, sort)
 
@@ -126,12 +159,82 @@ export default function Exercises() {
       <div className="relative mb-3">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
         <input
-          className="input pl-9"
+          className="input pl-9 pr-10"
           placeholder="Search exercises or tags…"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        <button
+          className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition ${
+            showFilters || activeFilterCount > 0
+              ? 'text-indigo-400'
+              : 'text-slate-500 hover:text-slate-300'
+          }`}
+          onClick={() => setShowFilters(v => !v)}
+          title="Filter"
+        >
+          <SlidersHorizontal size={16} />
+          {activeFilterCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="mb-3 space-y-2.5 bg-slate-800/40 rounded-xl p-3">
+          {allMuscles.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Muscle</p>
+              <div className="flex flex-wrap gap-1.5">
+                {allMuscles.map(m => (
+                  <button
+                    key={m}
+                    onClick={() => toggleMuscle(m)}
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition ${
+                      activeMuscles.includes(m)
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {m.replace(/_/g, ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {allTags.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tag</p>
+              <div className="flex flex-wrap gap-1.5">
+                {allTags.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => toggleTag(t)}
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition ${
+                      activeTags.includes(t)
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearFilters}
+              className="text-xs text-slate-400 hover:text-slate-200 transition flex items-center gap-1"
+            >
+              <X size={12} /> Clear filters
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Sort toggle */}
       <div className="flex gap-1.5 mb-4 bg-slate-800/60 rounded-xl p-1">

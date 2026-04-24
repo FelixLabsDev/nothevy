@@ -18,6 +18,7 @@ import DocEditor from '@/pages/DocEditor'
 import Workouts from '@/pages/Workouts'
 import WorkoutEditor from '@/pages/WorkoutEditor'
 import WorkoutSetup from '@/pages/WorkoutSetup'
+import CustomWorkout from '@/pages/CustomWorkout'
 
 // ---------------------------------------------------------------------------
 // SyncWatcher — uses useLiveQuery (reliable Dexie 4 change detection) to
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="/workouts/new" element={<WorkoutEditor />} />
         <Route path="/workouts/:id" element={<WorkoutEditor />} />
         <Route path="/workouts/:id/setup" element={<WorkoutSetup />} />
+        <Route path="/custom-workout" element={<CustomWorkout />} />
         <Route path="/session/active" element={<ActiveSession />} />
         <Route path="/session/:id" element={<SessionRecap />} />
         <Route path="/history" element={<History />} />
